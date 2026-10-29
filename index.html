@@ -2046,6 +2046,145 @@ input:focus, textarea:focus, select:focus{
   box-shadow:0 0 0 5px rgba(124,58,237,.25), 0 12px 0 #4c1d95, 0 18px 28px rgba(0,0,0,.2)!important;
 }
 
+
+/* ========== Account lock: mobile create-account fix ========== */
+#accountLock{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch;
+  align-items:flex-start!important;
+}
+#accountLock .portal{
+  min-height:100%!important;
+  min-height:100dvh!important;
+}
+#accountLock .portal-left{
+  justify-content:flex-start!important;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))!important;
+}
+#accountLock .portal-actions{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  margin-top:12px!important;
+}
+#accountLock .btn-login-main{
+  display:block!important;
+  width:100%!important;
+  min-height:48px!important;
+  font-size:16px!important;
+  -webkit-tap-highlight-color:transparent;
+}
+#accountLock .btn-login-main[hidden]{
+  display:none!important;
+}
+#accountLock .portal-foot{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  margin-top:20px!important;
+  padding:12px 0!important;
+  flex-wrap:wrap!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+#accountLock .btn-ghost{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:44px!important;
+  min-width:96px!important;
+  padding:10px 18px!important;
+  font-size:15px!important;
+  font-weight:700!important;
+  background:#3f3f46!important;
+  color:#fff!important;
+  border-radius:10px!important;
+  border:0!important;
+  cursor:pointer!important;
+  -webkit-tap-highlight-color:transparent;
+}
+#accountLock .btn-auth-toggle{
+  display:block!important;
+  width:100%!important;
+  margin-top:12px!important;
+  min-height:48px!important;
+  padding:14px 16px!important;
+  border-radius:12px!important;
+  border:2px solid rgba(251,113,133,.65)!important;
+  background:rgba(244,63,94,.12)!important;
+  color:#fecdd3!important;
+  font:700 15px system-ui!important;
+  cursor:pointer!important;
+  -webkit-tap-highlight-color:transparent;
+}
+#accountLock .btn-auth-toggle:active{
+  background:rgba(244,63,94,.25)!important;
+}
+#accountLock .auth-note{
+  margin-top:14px!important;
+  opacity:.6!important;
+  font-size:11px!important;
+}
+#accountLock #pass2Wrap[hidden]{display:none!important}
+#accountLock #pass2Wrap:not([hidden]){display:block!important}
+
+@media(max-width:820px){
+  #accountLock{
+    display:block!important;
+    padding:0!important;
+  }
+  #accountLock .portal{
+    flex-direction:column!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  #accountLock .portal-right{
+    order:-1!important;
+    min-height:0!important;
+    max-height:140px!important;
+    padding:18px 16px 12px!important;
+    overflow:hidden!important;
+  }
+  #accountLock .hero-title{
+    font-size:22px!important;
+    margin-bottom:4px!important;
+  }
+  #accountLock .hero-sub{font-size:12px!important;margin-bottom:8px!important}
+  #accountLock .hero-art{display:none!important} /* free space for form on phones */
+  #accountLock .hero-pills{display:none!important}
+  #accountLock .portal-left{
+    flex:none!important;
+    width:100%!important;
+    padding:20px 18px 48px!important;
+    min-height:auto!important;
+  }
+  #accountLock .portal-brand{margin-bottom:12px!important}
+  #accountLock .portal-left h2{font-size:26px!important}
+  #accountLock .portal-sub{margin-bottom:16px!important;font-size:13px!important}
+  #accountLock .field{margin-bottom:14px!important}
+  #accountLock input{
+    font-size:16px!important; /* prevents iOS zoom */
+    padding:12px 0!important;
+  }
+  /* Keep signup controls clearly visible */
+  #accountLock .portal-foot{
+    position:relative!important;
+    background:transparent!important;
+    border-top:1px solid rgba(255,255,255,.08);
+    margin-top:16px!important;
+    padding-top:16px!important;
+  }
+  #accountLock .btn-auth-toggle{
+    margin-top:10px!important;
+  }
+}
+@media(max-width:380px){
+  #accountLock .portal-right{max-height:110px!important;padding:14px 14px 8px!important}
+  #accountLock .hero-title{font-size:20px!important}
+}
+
 </style>
 </head>
 <body>
@@ -2111,14 +2250,16 @@ input:focus, textarea:focus, select:focus{
       </div>
       <div class="portal-actions">
         <button type="button" class="btn-login-main" id="btnLogin">Login</button>
-        <button type="button" class="btn-login-main" id="btnCreateAccount" style="display:none;background:linear-gradient(90deg,#be123c,#fb7185)">Create account</button>
+        <button type="button" class="btn-login-main" id="btnCreateAccount" hidden style="background:linear-gradient(90deg,#be123c,#fb7185)">Create account</button>
       </div>
       <p class="msg" id="accountMsg"></p>
       <div class="portal-foot">
         <span id="authFootHint">Don't have an account?</span>
         <button type="button" class="btn-ghost" id="btnAuthSwitch">Sign up</button>
       </div>
-      <p class="small" style="margin-top:16px;opacity:.55;font-size:11px">Accounts stay on this device. Phones only need the QR — no login.</p>
+      <!-- Extra clear path on mobile -->
+      <button type="button" class="btn-auth-toggle" id="btnAuthSwitch2">Create a new account</button>
+      <p class="small auth-note">Accounts stay on this device. Phones only need the QR — no login.</p>
     </div>
     <div class="portal-right">
       <div class="hero-title">Stay safe.<br>Stay connected.</div>
@@ -2419,28 +2560,39 @@ function authMsg(t,bad){
 function setAuthMode(mode){
   window.__authMode=mode;
   const pass2=$("accountPass2"), pass2Wrap=$("pass2Wrap");
-  const sw=$("btnAuthSwitch"), login=$("btnLogin"), create=$("btnCreateAccount");
+  const sw=$("btnAuthSwitch"), sw2=$("btnAuthSwitch2");
+  const login=$("btnLogin"), create=$("btnCreateAccount");
   const title=$("authTitle"), sub=$("authSub"), hint=$("authFootHint");
   if(mode==="create"){
     if(title) title.textContent="Sign up";
     if(sub) sub.textContent="Create an account — email + password protect your private QR";
-    if(pass2Wrap) pass2Wrap.style.display="block";
+    if(pass2Wrap){pass2Wrap.style.display="block";pass2Wrap.hidden=false}
     else if(pass2) pass2.style.display="block";
-    if(login) login.style.display="none";
-    if(create){create.style.display="block"}
+    if(login){login.style.display="none";login.hidden=true}
+    if(create){create.style.display="block";create.hidden=false}
     if(sw) sw.textContent="Login";
+    if(sw2){sw2.textContent="Already have an account? Login";sw2.hidden=false}
     if(hint) hint.textContent="Already have an account?";
   }else{
     if(title) title.textContent="Login";
     if(sub) sub.textContent="Enter your account details to open the alarm station";
-    if(pass2Wrap) pass2Wrap.style.display="none";
+    if(pass2Wrap){pass2Wrap.style.display="none";pass2Wrap.hidden=true}
     else if(pass2) pass2.style.display="none";
-    if(login) login.style.display="block";
-    if(create) create.style.display="none";
+    if(login){login.style.display="block";login.hidden=false}
+    if(create){create.style.display="none";create.hidden=true}
     if(sw) sw.textContent="Sign up";
+    if(sw2){sw2.textContent="Create a new account";sw2.hidden=false}
     if(hint) hint.textContent="Don't have an account?";
   }
   authMsg("",null);
+  // Keep form in view on mobile after switch
+  try{
+    const lock=$("accountLock");
+    if(lock) lock.scrollTop=0;
+    const left=document.querySelector("#accountLock .portal-left");
+    if(left) left.scrollTop=0;
+    if(title) title.scrollIntoView({block:"nearest",behavior:"smooth"});
+  }catch(e){}
 }
 function showAccountChip(em){
   const chip=$("accountChip"); if(!chip) return;
@@ -2511,6 +2663,9 @@ async function doCreateAccount(){
 if($("btnLogin")) $("btnLogin").onclick=()=>{doLogin()};
 if($("btnCreateAccount")) $("btnCreateAccount").onclick=()=>doCreateAccount();
 if($("btnAuthSwitch")) $("btnAuthSwitch").onclick=()=>{
+  setAuthMode(window.__authMode==="create"?"login":"create");
+};
+if($("btnAuthSwitch2")) $("btnAuthSwitch2").onclick=()=>{
   setAuthMode(window.__authMode==="create"?"login":"create");
 };
 ["accountEmail","accountPass","accountPass2"].forEach(id=>{
