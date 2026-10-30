@@ -3045,6 +3045,16 @@ body.has-session #settingsBtn{
   letter-spacing:.2em!important;
 }
 
+
+.code-big, #lcode{
+  font-size:clamp(28px, 10vw, 42px)!important;
+  letter-spacing:.22em!important;
+  font-weight:900!important;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
 </style>
 </head>
 <body>
@@ -3197,7 +3207,7 @@ body.has-session #settingsBtn{
         <div class="small" style="margin:2px 0 0">SafeLink monitoring</div>
       </div>
     </div>
-    <p class="small" style="opacity:.85">Your private QR for <b id="accountEmailLabel">…</b></p><p class="small" style="opacity:.7;margin-top:2px">Permanent for this email — only phones that scan this QR join you</p>
+    <p class="small" style="opacity:.85">Your private QR for <b id="accountEmailLabel">…</b></p><p class="small" style="opacity:.7;margin-top:2px">6-character code (letters + numbers) — only phones with this code join you</p>
     <div class="qr-stage" id="qrStage">
       <div class="qr-wrap" id="qrWrap">
         <div id="qr"></div>
@@ -4023,6 +4033,16 @@ function normalizePairCode(c){
   return String(c||"").replace(/[^a-zA-Z0-9]/g,"").slice(0,6);
 }
 
+function isExactSixCode(c){
+  const raw=String(c||"").replace(/[^a-zA-Z0-9]/g,"");
+  return raw.length===6;
+}
+function ensureSixCode(existing){
+  if(isExactSixCode(existing)) return normalizePairCode(existing);
+  return randomPairCode();
+}
+
+
 function authMsg(t,bad){
   const el=$("accountMsg"); if(!el) return;
   el.textContent=t||"";
@@ -4167,10 +4187,9 @@ async function doLogin(){
   if(!accounts[em]){authMsg(lang==="hi"?"इस ईमेल से कोई खाता नहीं। पहले बनाएँ।":"No account with this email. Create an account first.",true);return}
   const hash=await hashPass(em, pass);
   if(accounts[em].hash!==hash){authMsg(lang==="hi"?"गलत पासवर्ड":"Wrong password for this email",true);return}
-  // Use stored random pair code (generate once if missing)
-  let pairCode=normalizePairCode(accounts[em].code);
-  if(pairCode.length!==6){
-    pairCode=randomPairCode();
+  // Always exactly 6 chars (letters + numbers). Old 8-char codes are replaced.
+  let pairCode=ensureSixCode(accounts[em].code);
+  if(accounts[em].code!==pairCode){
     accounts[em].code=pairCode;
     saveAccounts(accounts);
   }
@@ -4519,8 +4538,8 @@ function connect(){
       client.on("connect",()=>{
         if(role==="server"){client.subscribe(topic("sos"));client.subscribe(topic("cancel"));client.subscribe(topic("phone"));client.subscribe(topic("voice"));client.subscribe(topic("checkin"));setStatus("Waiting for phones…",false)}
         else{client.subscribe(topic("ack"));client.subscribe(topic("stop"));client.subscribe(topic("coming"));client.subscribe(topic("server"));client.subscribe(topic("laptop"));setStatus("Looking for server…",false)}
-        beat();setInterval(beat,1200);
-        if(role==="server") setInterval(updatePhones,1500);
+        beat();setInterval(beat,2000);
+        if(role==="server") setInterval(updatePhones,2000);
         resolve(true);
       });
       client.on("message",(t,buf)=>{let d={};try{d=JSON.parse(buf.toString())}catch(e){} onMsg(t,d)});
@@ -4686,17 +4705,23 @@ async function startServer(ok){
   const accounts=getAccounts();
   let pair=store.get("sl_code_server");
   if(accounts[em]&&accounts[em].code) pair=accounts[em].code;
-  if(!pair||normalizePairCode(pair).length!==6){
+  // Upgrade any old long codes to a fresh 6-char random code
+  const fixed=ensureSixCode(pair);
+  if(!isExactSixCode(pair) || fixed!==normalizePairCode(pair)){
+    pair=fixed;
+    if(accounts[em]){accounts[em].code=pair; saveAccounts(accounts);}
+  }else{
+    pair=fixed;
+  }
+  if(!pair||!isExactSixCode(pair)){
     showAccount();
-    authMsg("Please log in again (password now protects your QR code).",true);
+    authMsg("Please log in again to get a 6-character code.",true);
     return;
   }
-  // Fully leave login page before showing monitoring
   hideAuthOverlay();
   role="server";
   store.set("sl_role","server");
   code=normalizePairCode(pair);
-  if(code.length!==6){showAccount();authMsg("Invalid pair code — log in again.",true);return;}
   store.set("sl_code_server",code);
   if(accounts[em]){accounts[em].code=code;saveAccounts(accounts)}
   // Dedicated server monitoring page
