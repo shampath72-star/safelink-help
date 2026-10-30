@@ -3016,6 +3016,35 @@ body.has-session #settingsBtn{
   display:grid!important;
 }
 
+
+/* Cool QR styling */
+#qr.qr-cool, .qr-wrap{
+  background:linear-gradient(145deg,#fff,#fff5f7)!important;
+  border-radius:18px!important;
+  padding:16px!important;
+  box-shadow:
+    0 0 0 3px rgba(244,63,94,.25),
+    0 0 0 8px rgba(244,63,94,.08),
+    0 14px 32px rgba(0,0,0,.4)!important;
+  position:relative;
+}
+#qr.qr-cool::after, .qr-wrap::after{
+  content:"";
+  pointer-events:none;
+  position:absolute;inset:-2px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(251,113,133,.35),transparent 40%,transparent 60%,rgba(244,63,94,.25));
+  z-index:0;
+  opacity:.7;
+}
+#qr canvas, #qr img{
+  position:relative;z-index:1;
+  border-radius:8px;
+}
+.code-big{
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.2em!important;
+}
+
 </style>
 </head>
 <body>
@@ -3218,8 +3247,8 @@ body.has-session #settingsBtn{
     <div class="card-title">📱 Phone · HELP button</div>
 
     <div id="stepCode">
-      <p class="small">Enter the 6-digit code shown on the server:</p>
-      <input id="pcode" style="letter-spacing:.2em;text-transform:none" class="code-in" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="off">
+      <p class="small">Enter the 6-character code shown on the server:</p>
+      <input id="pcode" style="letter-spacing:.18em" class="code-in" inputmode="text" maxlength="6" placeholder="Ab12Xy" autocomplete="off" autocapitalize="off" autocomplete="off">
       <button class="btn" id="btnCode">Next</button>
     </div>
 
@@ -3678,7 +3707,200 @@ let mediaRec=null, recChunks=[];
 
 /* Theme & lang */
 if($("themeBtn")) $("themeBtn").onclick=()=>{const t=document.documentElement.getAttribute("data-theme")==="light"?"":"light";document.documentElement.setAttribute("data-theme",t);store.set("sl_theme",t)};
-$("langBtn").onclick=()=>{lang=lang==="en"?"hi":"en";store.set("sl_lang",lang);$("langBtn").textContent=lang==="en"?"EN":"हिं";$("subText").textContent=lang==="en"?"Press HELP → server sounds alarm so someone can help.":"HELP दबाएँ → सर्वर पर अलार्म बजेगा।"};
+const I18N={
+  en:{
+    sub:"Press HELP → server sounds alarm so someone can help.",
+    pickTitle:"Which device is this?",
+    pickSub:"Choose your role — both stay linked in real time.",
+    pickServer:"🖥  Server — alarm station",
+    pickPhone:"📱  Phone — HELP button",
+    serverTitle:"🖥 Server · Alarm station",
+    phoneTitle:"📱 Phone · HELP button",
+    arm:"Arm alarm",
+    test:"Test (3 sec)",
+    stopAll:"Stop all alarms",
+    helpLabel:"HELP",
+    safeBtn:"I'm safe — stop my alarm",
+    cancelHelp:"Cancel HELP",
+    next:"Next",
+    cont:"Continue",
+    enterCode:"Enter the 6-character code shown on the server:",
+    yourName:"Your name (required) — shown on server when you need help:",
+    namePh:"Your full name",
+    settings:"Settings",
+    soundSec:"Sound",
+    clickSounds:"Button click sounds",
+    connectSounds:"Connection sounds",
+    alarmSound:"Alarm / siren sound",
+    vibrate:"Vibration (phone)",
+    serverSec:"Server",
+    maxPhones:"Max connected phones",
+    silentMode:"Silent mode (visual alarm only)",
+    accountSec:"Account",
+    signOut:"Sign out",
+    switchRole:"Switch role (Phone / Server)",
+    about:"About",
+    waitingPhones:"Waiting for phones…",
+    noPhones:"Waiting for a phone to scan the QR…",
+    connected:"Connected",
+    codeWord:"Code",
+    loginTitle:"Login",
+    signupTitle:"Sign up",
+    loginSub:"Enter your account details to open the alarm station",
+    signupSub:"Create an account — email + password protect your private QR",
+    createAcc:"Create account",
+    createNew:"Create a new account",
+    alreadyAcc:"Already have an account? Login",
+    dontHave:"Don't have an account?",
+    signUp:"Sign up",
+    back:"← Back",
+    emergency:"🆘 EMERGENCY",
+    permEnable:"Enable permissions",
+    voiceSec:"Voice note",
+    contacts:"Emergency contacts",
+    options:"Options",
+    call112:"Call 112",
+    call1091:"Call 1091"
+  },
+  hi:{
+    sub:"HELP दबाएँ → सर्वर पर अलार्म बजेगा ताकि कोई मदद कर सके।",
+    pickTitle:"यह कौन सा डिवाइस है?",
+    pickSub:"अपनी भूमिका चुनें — दोनों रियल-टाइम में जुड़े रहेंगे।",
+    pickServer:"🖥  सर्वर — अलार्म स्टेशन",
+    pickPhone:"📱  फोन — HELP बटन",
+    serverTitle:"🖥 सर्वर · अलार्म स्टेशन",
+    phoneTitle:"📱 फोन · HELP बटन",
+    arm:"अलार्म सक्रिय करें",
+    test:"टेस्ट (3 सेकंड)",
+    stopAll:"सभी अलार्म बंद करें",
+    helpLabel:"मदद",
+    safeBtn:"मैं सुरक्षित हूँ — अलार्म बंद करें",
+    cancelHelp:"HELP रद्द करें",
+    next:"आगे",
+    cont:"जारी रखें",
+    enterCode:"सर्वर पर दिखा 6 अक्षर का कोड डालें:",
+    yourName:"आपका नाम (ज़रूरी) — मदद पर सर्वर पर दिखेगा:",
+    namePh:"आपका पूरा नाम",
+    settings:"सेटिंग्स",
+    soundSec:"आवाज़",
+    clickSounds:"बटन क्लिक ध्वनि",
+    connectSounds:"कनेक्शन ध्वनि",
+    alarmSound:"अलार्म / सायरन ध्वनि",
+    vibrate:"वाइब्रेशन (फोन)",
+    serverSec:"सर्वर",
+    maxPhones:"अधिकतम जुड़े फोन",
+    silentMode:"साइलेंट मोड (केवल दिखने वाला अलार्म)",
+    accountSec:"खाता",
+    signOut:"साइन आउट",
+    switchRole:"भूमिका बदलें (फोन / सर्वर)",
+    about:"जानकारी",
+    waitingPhones:"फोन की प्रतीक्षा…",
+    noPhones:"QR स्कैन करने के लिए फोन की प्रतीक्षा…",
+    connected:"जुड़ गया",
+    codeWord:"कोड",
+    loginTitle:"लॉगिन",
+    signupTitle:"साइन अप",
+    loginSub:"अलार्म स्टेशन खोलने के लिए अपना खाता दर्ज करें",
+    signupSub:"खाता बनाएँ — ईमेल + पासवर्ड से आपका निजी QR सुरक्षित रहेगा",
+    createAcc:"खाता बनाएँ",
+    createNew:"नया खाता बनाएँ",
+    alreadyAcc:"पहले से खाता है? लॉगिन करें",
+    dontHave:"खाता नहीं है?",
+    signUp:"साइन अप",
+    back:"← वापस",
+    emergency:"🆘 आपात स्थिति",
+    permEnable:"अनुमतियाँ चालू करें",
+    voiceSec:"वॉइस नोट",
+    contacts:"आपातकालीन संपर्क",
+    options:"विकल्प",
+    call112:"112 कॉल करें",
+    call1091:"1091 कॉल करें"
+  }
+};
+function t(key){
+  const pack=I18N[lang]||I18N.en;
+  return (pack&&pack[key])||(I18N.en[key])||key;
+}
+function applyLang(){
+  try{
+    if($("langBtn")) $("langBtn").textContent=lang==="en"?"EN":"हिं";
+    if($("subText")) $("subText").textContent=t("sub");
+    const pickTitle=document.querySelector("#pick .card-title");
+    if(pickTitle) pickTitle.textContent=t("pickTitle");
+    const pickSub=document.querySelector("#pick .small");
+    if(pickSub && pickSub.textContent.indexOf("Choose")>=0||(pickSub&&lang==="hi")){
+      // first small under pick
+    }
+    const pickSmalls=document.querySelectorAll("#pick > .small");
+    if(pickSmalls[0]) pickSmalls[0].textContent=t("pickSub");
+    if($("pickServer")) $("pickServer").textContent=t("pickServer");
+    if($("pickPhone")) $("pickPhone").textContent=t("pickPhone");
+    const st=document.querySelector("#server .card-title");
+    if(st) st.textContent=t("serverTitle");
+    const pt=document.querySelector("#phone .card-title");
+    if(pt) pt.textContent=t("phoneTitle");
+    if($("arm")) $("arm").textContent=$("arm").textContent.indexOf("✓")>=0?($("arm").textContent):t("arm");
+    if($("test")) $("test").textContent=t("test");
+    if($("stopAll")) $("stopAll").textContent=t("stopAll");
+    const hl=document.querySelector(".help-label");
+    if(hl) hl.textContent=t("helpLabel");
+    if($("safeBtn")) $("safeBtn").textContent=t("safeBtn");
+    if($("cancelCountBtn")) $("cancelCountBtn").textContent=t("cancelHelp");
+    if($("btnCode")) $("btnCode").textContent=t("next");
+    if($("btnName")) $("btnName").textContent=t("cont");
+    const stepCodeP=document.querySelector("#stepCode .small");
+    if(stepCodeP) stepCodeP.textContent=t("enterCode");
+    const stepNameP=document.querySelector("#stepName .small");
+    if(stepNameP) stepNameP.innerHTML=t("yourName");
+    if($("pname")) $("pname").placeholder=t("namePh");
+    // settings
+    const sh=document.querySelector(".settings-head h3");
+    if(sh) sh.textContent=t("settings");
+    const secs=document.querySelectorAll(".settings-section");
+    // map by known English originals is fragile — set by id where possible
+    if($("setSignOut")) $("setSignOut").textContent=t("signOut");
+    if($("setSwitchRole")) $("setSwitchRole").textContent=t("switchRole");
+    // settings row labels
+    const rows=document.querySelectorAll(".settings-row > span");
+    const rowKeys=["clickSounds","connectSounds","alarmSound","vibrate","maxPhones","silentMode"];
+    rows.forEach((el,i)=>{ if(rowKeys[i]) el.textContent=t(rowKeys[i]); });
+    const ssecs=document.querySelectorAll(".settings-section");
+    if(ssecs[0]) ssecs[0].textContent=t("soundSec");
+    if(ssecs[1]) ssecs[1].textContent=t("serverSec");
+    if(ssecs[2]) ssecs[2].textContent=t("accountSec");
+    if(ssecs[3]) ssecs[3].textContent=t("about");
+    // auth
+    if($("authTitle")) $("authTitle").textContent=window.__authMode==="create"?t("signupTitle"):t("loginTitle");
+    if($("authSub")) $("authSub").textContent=window.__authMode==="create"?t("signupSub"):t("loginSub");
+    if($("btnLogin")) $("btnLogin").textContent=t("loginTitle");
+    if($("btnCreateAccount")) $("btnCreateAccount").textContent=t("createAcc");
+    if($("btnAuthSwitch")) $("btnAuthSwitch").textContent=window.__authMode==="create"?t("loginTitle"):t("signUp");
+    if($("btnAuthSwitch2")) $("btnAuthSwitch2").textContent=window.__authMode==="create"?t("alreadyAcc"):t("createNew");
+    if($("authFootHint")) $("authFootHint").textContent=window.__authMode==="create"?t("alreadyAcc").split("?")[0]+"?":t("dontHave");
+    if($("btnAuthBack")) $("btnAuthBack").textContent=t("back");
+    if($("btnPerms")) $("btnPerms").textContent=t("permEnable");
+    // emergency heading
+    const eh=document.querySelector("#alarmbox h2");
+    if(eh) eh.textContent=t("emergency");
+    // section labels on phone
+    document.querySelectorAll("#phone .section").forEach(el=>{
+      const v=el.textContent.trim();
+      if(/voice/i.test(v)||v==="वॉइस नोट") el.textContent=t("voiceSec");
+      else if(/contact/i.test(v)||/संपर्क/.test(v)) el.textContent=t("contacts");
+      else if(/option/i.test(v)||/विकल्प/.test(v)) el.textContent=t("options");
+    });
+    document.querySelectorAll('a.btn[href="tel:112"]').forEach(a=>a.textContent=t("call112"));
+    document.querySelectorAll('a.btn[href="tel:1091"]').forEach(a=>a.textContent=t("call1091"));
+    if($("pairLinkText")&&code) $("pairLinkText").textContent=t("codeWord")+": "+code;
+  }catch(e){console&&console.warn("applyLang",e)}
+}
+$("langBtn").onclick=()=>{
+  lang=lang==="en"?"hi":"en";
+  store.set("sl_lang",lang);
+  applyLang();
+  try{window.slSound&&window.slSound.switch()}catch(e){}
+};
+
 
 /* PIN */
 
@@ -3722,13 +3944,20 @@ function isLegitEmail(s){
    password → same code. Different password → different isolated code. */
 function codeFromSecret(secret){
   secret=String(secret||"");
-  let h=2166136261;
-  for(let i=0;i<secret.length;i++){h^=secret.charCodeAt(i);h=Math.imul(h,16777619)}
-  // Always a 6-digit numeric pair code (000000–999999)
-  const a=Math.abs(h>>>0);
-  const b=Math.abs(Math.imul(h,2654435761)>>>0);
-  const n=(a^b)%1000000;
-  return String(n).padStart(6,"0");
+  let h=2166136261>>>0;
+  for(let i=0;i<secret.length;i++){h^=secret.charCodeAt(i);h=Math.imul(h,16777619)>>>0}
+  // 6-char code: A–Z, a–z, 0–9
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"; // no 0,O,1,l,I for clarity
+  let out="";
+  let x=h>>>0;
+  let y=Math.imul(h,2654435761)>>>0;
+  for(let i=0;i<6;i++){
+    const mix=(x+y+i*9973)>>>0;
+    out+=chars[mix%chars.length];
+    x=Math.imul(x,1664525)+1013904223>>>0;
+    y=Math.imul(y,22695477)+1>>>0;
+  }
+  return out;
 }
 /** @deprecated email-only — kept only for one-time migration of old accounts */
 function codeFromEmail(email){
@@ -3766,25 +3995,25 @@ function setAuthMode(mode){
   const login=$("btnLogin"), create=$("btnCreateAccount");
   const title=$("authTitle"), sub=$("authSub"), hint=$("authFootHint");
   if(mode==="create"){
-    if(title) title.textContent="Sign up";
-    if(sub) sub.textContent="Create an account — email + password protect your private QR";
+    if(title) title.textContent=typeof t==="function"?t("signupTitle"):"Sign up";
+    if(sub) sub.textContent=typeof t==="function"?t("signupSub"):"Create an account — email + password protect your private QR";
     if(pass2Wrap){pass2Wrap.style.display="block";pass2Wrap.hidden=false}
     else if(pass2) pass2.style.display="block";
     if(login){login.style.display="none";login.hidden=true}
     if(create){create.style.display="block";create.hidden=false}
-    if(sw) sw.textContent="Login";
-    if(sw2){sw2.textContent="Already have an account? Login";sw2.hidden=false}
-    if(hint) hint.textContent="Already have an account?";
+    if(sw) sw.textContent=typeof t==="function"?t("loginTitle"):"Login";
+    if(sw2){sw2.textContent=typeof t==="function"?t("alreadyAcc"):"Already have an account? Login";sw2.hidden=false}
+    if(hint) hint.textContent=typeof t==="function"?t("alreadyAcc"):"Already have an account?";
   }else{
-    if(title) title.textContent="Login";
-    if(sub) sub.textContent="Enter your account details to open the alarm station";
+    if(title) title.textContent=typeof t==="function"?t("loginTitle"):"Login";
+    if(sub) sub.textContent=typeof t==="function"?t("loginSub"):"Enter your account details to open the alarm station";
     if(pass2Wrap){pass2Wrap.style.display="none";pass2Wrap.hidden=true}
     else if(pass2) pass2.style.display="none";
     if(login){login.style.display="block";login.hidden=false}
     if(create){create.style.display="none";create.hidden=true}
-    if(sw) sw.textContent="Sign up";
-    if(sw2){sw2.textContent="Create a new account";sw2.hidden=false}
-    if(hint) hint.textContent="Don't have an account?";
+    if(sw) sw.textContent=typeof t==="function"?t("signUp"):"Sign up";
+    if(sw2){sw2.textContent=typeof t==="function"?t("createNew"):"Create a new account";sw2.hidden=false}
+    if(hint) hint.textContent=typeof t==="function"?t("dontHave"):"Don't have an account?";
   }
   authMsg("",null);
   // Keep form in view on mobile after switch
@@ -4365,8 +4594,8 @@ function baseUrl(){const u=new URL(location.href);u.hash="";u.search="";return u
 function pairLink(){return baseUrl()+"?c="+code}
 function drawQr(){
   const q=$("qr");if(!q)return;q.innerHTML="";
-  // QR encodes ONLY the 6-digit pair code (not a URL)
-  const pairCode=String(code||"").replace(/\D/g,"").slice(0,6);
+  // QR encodes ONLY the 6-char pair code (letters + numbers)
+  const pairCode=String(code||"").replace(/[^a-zA-Z0-9]/g,"").slice(0,6);
   if(!pairCode||pairCode.length!==6){
     q.innerHTML="<p class='small'>Code not ready</p>";
     return;
@@ -4375,19 +4604,21 @@ function drawQr(){
     if(typeof QRCode==="undefined"){
       q.innerHTML="<p class='small'>QR loading… use code below</p>";
     }else{
-      new QRCode(q,{text:pairCode,width:180,height:180,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.M});
+      q.classList.add("qr-cool");
+      new QRCode(q,{text:pairCode,width:200,height:200,colorDark:"#9f1239",colorLight:"#fff5f7",correctLevel:QRCode.CorrectLevel.H});
     }
-  }catch(e){q.innerHTML="<p class='small'>QR unavailable — use 6-digit code</p>"}
+  }catch(e){q.innerHTML="<p class='small'>QR unavailable — use code below</p>"}
   const pl=$("pairLinkText");
-  if(pl) pl.textContent="Code: "+pairCode+"  ·  or open: "+pairLink();
+  if(pl) pl.textContent=(lang==="hi"?"कोड: ":"Code: ")+pairCode;
   const ae=$("accountEmailLabel");if(ae)ae.textContent=store.get("sl_account_email")||"";
+  if($("lcode")) $("lcode").textContent=pairCode;
 }
 function makeCode(){
   const em=store.get("sl_account_email")||"";
   const accounts=getAccounts();
   if(em&&accounts[em]&&accounts[em].code) return accounts[em].code;
   const saved=store.get("sl_code_server");
-  if(saved&&/^\d{6}$/.test(String(saved))) return saved;
+  if(saved&&/^[a-zA-Z0-9]{6}$/.test(String(saved))) return saved;
   // Should not reach here without login — refuse email-only derivation
   return null;
 }
@@ -4399,7 +4630,7 @@ async function startServer(ok){
   const accounts=getAccounts();
   let pair=store.get("sl_code_server");
   if(accounts[em]&&accounts[em].code) pair=accounts[em].code;
-  if(!pair||!/^\d{6}$/.test(String(pair))){
+  if(!pair||!/^[a-zA-Z0-9]{6}$/.test(String(pair))){
     showAccount();
     authMsg("Please log in again (password now protects your QR code).",true);
     return;
@@ -4408,7 +4639,7 @@ async function startServer(ok){
   hideAuthOverlay();
   role="server";
   store.set("sl_role","server");
-  code=String(pair).replace(/\D/g,"").slice(0,6).padStart(6,"0");
+  code=String(pair).replace(/[^a-zA-Z0-9]/g,"").slice(0,6);
   store.set("sl_code_server",code);
   if(accounts[em]){accounts[em].code=code;saveAccounts(accounts)}
   // Dedicated server monitoring page
@@ -4490,7 +4721,7 @@ async function startPhone(){
   if(sc&&sn){code=sc;myName=sn;$("stepCode").hidden=true;$("stepName").hidden=true;$("stepReady").hidden=false;$("nameLabel").textContent="You are: "+myName;await connect();warnings();loadContacts();readBattery();startNetBatWatch();refreshPerms();try{if(typeof Notification!=="undefined"&&Notification.permission==="default"){/* soft */} }catch(e){}}
   else if(sc){code=sc;$("stepCode").hidden=true;$("stepName").hidden=false}
 }
-$("btnCode").onclick=()=>{const c=$("pcode").value.trim().replace(/\D/g,"").slice(0,6);if(c.length!==6){$("pcode").focus();note("Enter the 6-digit code from the server",true);return}code=c;store.set("sl_code_phone",c);$("stepCode").hidden=true;$("stepName").hidden=false;$("pname").focus()};
+$("btnCode").onclick=()=>{const c=$("pcode").value.trim().replace(/[^a-zA-Z0-9]/g,"").slice(0,6);if(c.length!==6){$("pcode").focus();note(lang==="hi"?"सर्वर वाला 6 अक्षर का कोड डालें":"Enter the 6-character code from the server",true);return}code=c;store.set("sl_code_phone",c);$("stepCode").hidden=true;$("stepName").hidden=false;$("pname").focus()};
 $("btnName").onclick=async()=>{const n=$("pname").value.trim();if(n.length<2){$("pname").focus();return}myName=n.slice(0,24);store.set("sl_name_phone",myName);$("stepName").hidden=true;$("stepReady").hidden=false;$("nameLabel").textContent="You are: "+myName;await connect();warnings();loadContacts();readBattery();startNetBatWatch();refreshPerms();try{if(typeof Notification!=="undefined"&&Notification.permission==="default"){/* soft */} }catch(e){}};
 function warnings(){
   const box=$("warnBox");box.innerHTML="";
@@ -5227,13 +5458,13 @@ function goPhone(){try{store.set("sl_role","phone");hideAccountChip();hideAuthOv
 if($("pickServer")){$("pickServer").onclick=goServer;$("pickServer").ontouchend=function(e){e.preventDefault();goServer()}}
 if($("pickPhone")){$("pickPhone").onclick=goPhone;$("pickPhone").ontouchend=function(e){e.preventDefault();goPhone()}}
 if(store.get("sl_theme")==="light") document.documentElement.setAttribute("data-theme","light");
-lang=store.get("sl_lang")||"en";$("langBtn").textContent=lang==="en"?"EN":"हिं";
+lang=store.get("sl_lang")||"en";try{applyLang()}catch(e){if($("langBtn"))$("langBtn").textContent=lang==="en"?"EN":"हिं"}
 
 const params=new URLSearchParams(location.search);
 const q=params.get("c")||params.get("code");
 _bootPromise.then(()=>{
   try{
-    if(q&&(/^\d{6}$/.test(q)||/^[a-z0-9]{6,12}$/i.test(q))){
+    if(q&&/^[a-zA-Z0-9]{6}$/.test(q)){
       store.set("sl_role","phone");
       store.set("sl_code_phone",q.toLowerCase());
       startPhone();
