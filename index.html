@@ -2901,6 +2901,110 @@ h1:hover{
 }
 
 
+
+/* ========== Settings panel ========== */
+.topbar{z-index:60;position:relative}
+#settingsBtn{font-size:18px}
+.settings-panel{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.55);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:0;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+}
+.settings-panel[hidden]{display:none!important}
+.settings-sheet{
+  width:100%;max-width:440px;
+  max-height:min(88vh,640px);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:#1a1014;
+  border:1.5px solid rgba(251,113,133,.4);
+  border-radius:20px 20px 0 0;
+  box-shadow:0 -12px 40px rgba(0,0,0,.5);
+  padding:0 0 calc(20px + env(safe-area-inset-bottom,0px));
+  animation:sheetUp .35s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes sheetUp{
+  from{transform:translateY(40px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+.settings-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 16px 10px;position:sticky;top:0;
+  background:#1a1014;z-index:2;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.settings-head h3{font:800 18px system-ui;color:#fff;margin:0}
+.settings-body{padding:8px 16px 16px}
+.settings-section{
+  font:800 11px system-ui;letter-spacing:.12em;text-transform:uppercase;
+  color:#fda4af;margin:16px 0 8px;
+}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);
+  color:#fff0f3;font:600 14px system-ui;cursor:pointer;
+}
+.settings-row input[type=checkbox]{
+  width:44px!important;height:26px!important;appearance:none;-webkit-appearance:none;
+  background:#3f3f46!important;border-radius:999px!important;border:0!important;
+  position:relative;cursor:pointer;padding:0!important;flex-shrink:0;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.4)!important;
+}
+.settings-row input[type=checkbox]::after{
+  content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+  background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.35);transition:transform .2s ease;
+}
+.settings-row input[type=checkbox]:checked{background:#f43f5e!important}
+.settings-row input[type=checkbox]:checked::after{transform:translateX(18px)}
+.settings-row select{
+  background:#120c10!important;color:#fff!important;border:1.5px solid rgba(251,113,133,.4)!important;
+  border-radius:10px!important;padding:8px 12px!important;font:700 14px system-ui;
+  min-width:72px;
+}
+.settings-action{margin-top:8px!important}
+.settings-hint{color:#c4a0a8;font-size:12.5px;margin:4px 0 8px;line-height:1.4}
+@media(min-width:600px){
+  .settings-panel{align-items:center;padding:20px}
+  .settings-sheet{border-radius:20px;max-height:80vh}
+}
+[data-theme="light"] .settings-sheet{background:#fff;border-color:rgba(109,40,217,.3)}
+[data-theme="light"] .settings-head{background:#fff}
+[data-theme="light"] .settings-head h3,[data-theme="light"] .settings-row{color:#1a1225}
+
+
+/* Settings gear always available */
+#settingsBtn{
+  display:grid!important;
+  place-items:center!important;
+  font-size:18px!important;
+  z-index:60;
+}
+.settings-panel{z-index:400!important}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 4px;border-bottom:1px solid rgba(255,255,255,.06);
+  color:#fff0f3;font:600 14px system-ui;
+}
+.settings-row select{
+  background:#24181e!important;color:#fff!important;border:1px solid rgba(251,113,133,.4)!important;
+  border-radius:10px!important;padding:8px 10px!important;min-width:72px;
+}
+.settings-row input[type=checkbox]{
+  width:44px!important;height:26px!important;appearance:none;-webkit-appearance:none;
+  background:#3f3f46!important;border-radius:999px!important;border:0!important;
+  position:relative;cursor:pointer;padding:0!important;flex-shrink:0;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.4)!important;
+}
+.settings-row input[type=checkbox]::after{
+  content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+  background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.35);transition:transform .2s ease;
+}
+.settings-row input[type=checkbox]:checked{background:#f43f5e!important}
+.settings-row input[type=checkbox]:checked::after{transform:translateX(18px)}
+.settings-action{margin-top:8px!important}
+.settings-hint{color:#c4a0a8;font-size:13px;margin:6px 0 10px}
+
 </style>
 </head>
 <body>
@@ -3025,6 +3129,7 @@ h1:hover{
   <div class="topbar">
     <button class="icon-btn" id="themeBtn" title="Theme">🌓</button>
     <button class="icon-btn" id="langBtn" title="Language">EN</button>
+    <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">⚙</button>
   </div>
   <h1 title="SafeLink">SafeLink</h1>
   <p class="sub" id="subText">Press HELP → server sounds alarm so someone can help.</p>
@@ -3102,8 +3207,8 @@ h1:hover{
     <div class="card-title">📱 Phone · HELP button</div>
 
     <div id="stepCode">
-      <p class="small">Enter the 6-digit code from the server:</p>
-      <input id="pcode" style="letter-spacing:.08em;text-transform:lowercase" class="code-in" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off">
+      <p class="small">Enter the 6-digit code shown on the server:</p>
+      <input id="pcode" style="letter-spacing:.2em;text-transform:none" class="code-in" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="off">
       <button class="btn" id="btnCode">Next</button>
     </div>
 
@@ -3383,31 +3488,167 @@ const $ = id => document.getElementById(id);
       const t=ev.target.closest("button, .btn, a.btn, .icon-btn, .rec-btn, .help, .btn-login-main, .btn-ghost, .btn-auth-toggle, .btn-auth-back, .switch input, .ack-btn");
       if(!t) return;
       ensureCtx();
+      const canClick=typeof soundEnabled!=="function"||soundEnabled("click");
       if(t.id==="helpBtn"||t.classList.contains("help")){
-        window.slSound.help();
+        if(canClick) window.slSound.help();
       }else if(t.id==="btnLogin"||t.id==="btnCreateAccount"){
-        window.slSound.success();
+        if(canClick) window.slSound.success();
         ripple(t);
       }else if(t.id==="arm"){
-        window.slSound.arm();
+        if(canClick) window.slSound.arm();
         ripple(t);
       }else if(t.id==="stopAll"||t.id==="safeBtn"||t.id==="test"){
-        window.slSound.warn();
+        if(canClick) window.slSound.warn();
         ripple(t);
       }else if(t.classList.contains("icon-btn")||t.classList.contains("btn-ghost")||t.classList.contains("btn-auth-back")||t.id==="btnAuthSwitch"||t.id==="btnAuthSwitch2"){
-        window.slSound.switch();
+        if(canClick) window.slSound.switch();
       }else if(t.matches(".switch input")){
-        window.slSound.tap();
+        if(canClick) window.slSound.tap();
       }else{
-        window.slSound.click();
+        if(canClick) window.slSound.click();
         ripple(t);
       }
     }, {passive:true});
   }
+  // Respect Settings → sound toggles
+  const _rawSound=window.slSound;
+  window.slSound={
+    click(){ if(typeof soundEnabled==="function"&&!soundEnabled("click")) return; return _rawSound.click(); },
+    tap(){ if(typeof soundEnabled==="function"&&!soundEnabled("click")) return; return _rawSound.tap(); },
+    success(){ if(typeof soundEnabled==="function"&&!soundEnabled("connect")) return; return _rawSound.success(); },
+    connect(){ if(typeof soundEnabled==="function"&&!soundEnabled("connect")) return; return _rawSound.connect(); },
+    warn(){ if(typeof soundEnabled==="function"&&!soundEnabled("click")) return; return _rawSound.warn(); },
+    help(){ if(typeof soundEnabled==="function"&&!soundEnabled("alarm")) return; return _rawSound.help(); },
+    switch(){ if(typeof soundEnabled==="function"&&!soundEnabled("click")) return; return _rawSound.switch(); },
+    arm(){ if(typeof soundEnabled==="function"&&!soundEnabled("alarm")) return; return _rawSound.arm(); },
+    error(){ if(typeof soundEnabled==="function"&&!soundEnabled("click")) return; return _rawSound.error(); }
+  };
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", bindSounds);
   else bindSounds();
 })();
 
+
+
+/* ========== Settings ========== */
+function settingsGet(key, def){
+  const v=store.get("sl_set_"+key);
+  if(v===null||v===undefined||v==="") return def;
+  return v;
+}
+function settingsSet(key, val){store.set("sl_set_"+key, String(val))}
+function maxPhonesLimit(){
+  const n=parseInt(settingsGet("maxPhones","5"),10);
+  return (isNaN(n)||n<1)?5:Math.min(50,n);
+}
+function soundEnabled(kind){
+  // kind: click | connect | alarm
+  if(kind==="click") return settingsGet("clickSound","1")!=="0";
+  if(kind==="connect") return settingsGet("connectSound","1")!=="0";
+  if(kind==="alarm") return settingsGet("alarmSound","1")!=="0";
+  return true;
+}
+function vibrateEnabled(){return settingsGet("vibrate","1")!=="0"}
+
+function openSettings(){
+  const pan=$("settingsPanel"); if(!pan) return;
+  // Load values
+  if($("setClickSound")) $("setClickSound").checked=soundEnabled("click");
+  if($("setConnectSound")) $("setConnectSound").checked=soundEnabled("connect");
+  if($("setAlarmSound")) $("setAlarmSound").checked=soundEnabled("alarm");
+  if($("setVibrate")) $("setVibrate").checked=vibrateEnabled();
+  if($("setMaxPhones")) $("setMaxPhones").value=String(maxPhonesLimit());
+  if($("setSilentMode")){
+    const sm=$("silentMode");
+    $("setSilentMode").checked=sm?sm.checked:settingsGet("silent","0")==="1";
+  }
+  const em=store.get("sl_account_email")||"";
+  const roleNow=role||store.get("sl_role")||"";
+  if($("setAccountHint")){
+    $("setAccountHint").textContent=em
+      ?("Signed in as "+em+(roleNow?" · "+roleNow:""))
+      :(roleNow==="phone"?"Phone mode · no server account":"Not signed in");
+  }
+  // Server-only rows
+  const serverish=role==="server"||roleNow==="server";
+  ["setServerOnly","setMaxRow","setSilentRow"].forEach(id=>{
+    const el=$(id); if(el) el.style.display=serverish?"":"none";
+  });
+  pan.hidden=false;
+  try{window.slSound&&soundEnabled("click")&&window.slSound.click()}catch(e){}
+}
+function closeSettings(){
+  const pan=$("settingsPanel"); if(pan) pan.hidden=true;
+}
+function bindSettings(){
+  if($("settingsBtn")) $("settingsBtn").onclick=()=>openSettings();
+  if($("settingsClose")) $("settingsClose").onclick=()=>closeSettings();
+  const pan=$("settingsPanel");
+  if(pan) pan.addEventListener("click",e=>{if(e.target===pan) closeSettings()});
+  if($("setClickSound")) $("setClickSound").onchange=()=>settingsSet("clickSound",$("setClickSound").checked?"1":"0");
+  if($("setConnectSound")) $("setConnectSound").onchange=()=>settingsSet("connectSound",$("setConnectSound").checked?"1":"0");
+  if($("setAlarmSound")) $("setAlarmSound").onchange=()=>{
+    settingsSet("alarmSound",$("setAlarmSound").checked?"1":"0");
+    if(!$("setAlarmSound").checked) try{stopSiren()}catch(e){}
+  };
+  if($("setVibrate")) $("setVibrate").onchange=()=>settingsSet("vibrate",$("setVibrate").checked?"1":"0");
+  if($("setMaxPhones")) $("setMaxPhones").onchange=()=>{
+    settingsSet("maxPhones",$("setMaxPhones").value);
+    try{updatePhones()}catch(e){}
+    try{note("Max phones set to "+$("setMaxPhones").value,false)}catch(e){}
+  };
+  if($("setSilentMode")) $("setSilentMode").onchange=()=>{
+    const on=$("setSilentMode").checked;
+    settingsSet("silent",on?"1":"0");
+    if($("silentMode")) {$("silentMode").checked=on; store.set("sl_silent",on?"1":"0")}
+    if(on) try{stopSiren(); document.body.classList.add("alarm")}catch(e){}
+  };
+  if($("setSignOut")) $("setSignOut").onclick=()=>{
+    closeSettings();
+    try{adminLogout()}catch(e){}
+    // Phone logout too
+    try{
+      if(client){client.end(true);client=null}
+      store.set("sl_role","");
+      store.set("sl_code_phone","");
+      store.set("sl_name_phone","");
+      role=null; code=null; myName="";
+      hideAccountChip();
+      hideAuthOverlay();
+      show("pick");
+    }catch(e){}
+    try{window.slSound&&window.slSound.switch()}catch(e){}
+  };
+  if($("setSwitchRole")) $("setSwitchRole").onclick=()=>{
+    closeSettings();
+    try{if(client){client.end(true);client=null}}catch(e){}
+    try{stopSiren()}catch(e){}
+    role=null; code=null;
+    store.set("sl_role","");
+    hideAccountChip();
+    hideAuthOverlay();
+    show("pick");
+  };
+  if($("setClearLocal")) $("setClearLocal").onclick=()=>{
+    if(!confirm("Clear all SafeLink data on this device? You will need to set up again.")) return;
+    try{if(client){client.end(true);client=null}}catch(e){}
+    try{
+      const keys=[];
+      for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(k&&k.indexOf("sl_")==0) keys.push(k)}
+      keys.forEach(k=>localStorage.removeItem(k));
+    }catch(e){}
+    location.reload();
+  };
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", bindSettings);
+else bindSettings();
+
+
+function slVibrate(pattern){
+  try{
+    if(typeof vibrateEnabled==="function"&&!vibrateEnabled()) return;
+    if(navigator.vibrate) navigator.vibrate(pattern);
+  }catch(e){}
+}
 
 const store = {
   get(k){try{return localStorage.getItem(k)}catch(e){return null}},
@@ -3431,6 +3672,40 @@ $("langBtn").onclick=()=>{lang=lang==="en"?"hi":"en";store.set("sl_lang",lang);$
 /* PIN */
 
 function isEmail(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s||"").trim())}
+/* Block disposable / fake / clearly invalid emails */
+const BLOCKED_EMAIL_DOMAINS={
+  "mailinator.com":1,"guerrillamail.com":1,"guerrillamail.org":1,"sharklasers.com":1,
+  "tempmail.com":1,"temp-mail.org":1,"throwawaymail.com":1,"yopmail.com":1,"yopmail.fr":1,
+  "trashmail.com":1,"maildrop.cc":1,"10minutemail.com":1,"10minemail.com":1,"fakeinbox.com":1,
+  "getnada.com":1,"dispostable.com":1,"mailnesia.com":1,"mintemail.com":1,"emailondeck.com":1,
+  "tempail.com":1,"discard.email":1,"mailcatch.com":1,"mytemp.email":1,"tmpmail.org":1,
+  "tmpmail.net":1,"moakt.com":1,"spamgourmet.com":1,"mailnull.com":1,"tempinbox.com":1,
+  "example.com":1,"example.org":1,"example.net":1,"test.com":1,"fake.com":1,"localhost":1,
+  "mail.com.com":1,"email.invalid":1,"invalid.com":1
+};
+function isLegitEmail(s){
+  const em=String(s||"").trim().toLowerCase();
+  if(!isEmail(em)) return {ok:false, msg:"Enter a valid email address"};
+  if(em.length>80) return {ok:false, msg:"Email is too long"};
+  if(/\.\./.test(em)) return {ok:false, msg:"Email format is invalid"};
+  if(/^\./.test(em)||/\.$/.test(em.split("@")[0]||"")) return {ok:false, msg:"Email format is invalid"};
+  const parts=em.split("@");
+  if(parts.length!==2) return {ok:false, msg:"Enter a valid email address"};
+  const local=parts[0], domain=parts[1];
+  if(!local||local.length<2) return {ok:false, msg:"Email name is too short"};
+  if(!domain||domain.length<3) return {ok:false, msg:"Email domain is invalid"};
+  if(!domain.includes(".")) return {ok:false, msg:"Email domain is invalid"};
+  const tld=domain.split(".").pop();
+  if(!tld||tld.length<2||!/^[a-z]{2,24}$/i.test(tld)) return {ok:false, msg:"Email domain looks fake"};
+  // no pure numeric domain labels like 123.com as only label is ok but block test patterns
+  if(/^(test|fake|asdf|qwerty|abc|xxx|noemail|null|undefined)@/i.test(em))
+    return {ok:false, msg:"Please use a real email address"};
+  if(BLOCKED_EMAIL_DOMAINS[domain])
+    return {ok:false, msg:"Temporary / disposable emails are not allowed"};
+  // block domains with only digits
+  if(/^\d+\.\w+$/.test(domain)) return {ok:false, msg:"Email domain looks fake"};
+  return {ok:true, email:em};
+}
 /* Pair code is derived from email+password hash so knowing only the email
    is not enough to join someone else's MQTT room / QR. Same email + same
    password → same code. Different password → different isolated code. */
@@ -3438,8 +3713,11 @@ function codeFromSecret(secret){
   secret=String(secret||"");
   let h=2166136261;
   for(let i=0;i<secret.length;i++){h^=secret.charCodeAt(i);h=Math.imul(h,16777619)}
-  const n=Math.abs(h>>>0).toString(36)+Math.abs(Math.imul(h,2654435761)>>>0).toString(36);
-  return n.slice(0,8);
+  // Always a 6-digit numeric pair code (000000–999999)
+  const a=Math.abs(h>>>0);
+  const b=Math.abs(Math.imul(h,2654435761)>>>0);
+  const n=(a^b)%1000000;
+  return String(n).padStart(6,"0");
 }
 /** @deprecated email-only — kept only for one-time migration of old accounts */
 function codeFromEmail(email){
@@ -3597,9 +3875,11 @@ function adminLogout(){
   show("pick");
 }
 async function doLogin(){
-  const em=(($("accountEmail")&&$("accountEmail").value)||"").trim().toLowerCase();
+  const rawEm=(($("accountEmail")&&$("accountEmail").value)||"").trim().toLowerCase();
   const pass=($("accountPass")&&$("accountPass").value)||"";
-  if(!isEmail(em)){authMsg("Enter a valid email",true);return}
+  const check=isLegitEmail(rawEm);
+  if(!check.ok){authMsg(check.msg,true);return}
+  const em=check.email;
   if(!pass||pass.length<4){authMsg("Enter your password (min 4 characters)",true);return}
   const accounts=getAccounts();
   if(!accounts[em]){authMsg("No account with this email. Create an account first.",true);return}
@@ -3617,10 +3897,12 @@ async function doLogin(){
   startServer(true);
 }
 async function doCreateAccount(){
-  const em=(($("accountEmail")&&$("accountEmail").value)||"").trim().toLowerCase();
+  const rawEm=(($("accountEmail")&&$("accountEmail").value)||"").trim().toLowerCase();
   const pass=($("accountPass")&&$("accountPass").value)||"";
   const pass2=($("accountPass2")&&$("accountPass2").value)||"";
-  if(!isEmail(em)){authMsg("Enter a valid email",true);return}
+  const check=isLegitEmail(rawEm);
+  if(!check.ok){authMsg(check.msg,true);return}
+  const em=check.email;
   if(!pass||pass.length<4){authMsg("Password must be at least 4 characters",true);return}
   if(pass!==pass2){authMsg("Passwords do not match",true);return}
   const accounts=getAccounts();
@@ -3688,7 +3970,7 @@ function ago(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<5)return"just now
 
 let _knownPhoneIds=new Set();
 function celebratePhoneConnect(name){
-  try{window.slSound&&(window.slSound.connect?window.slSound.connect():window.slSound.success())}catch(e){}
+  try{if(typeof soundEnabled!=="function"||soundEnabled("connect")){window.slSound&&(window.slSound.connect?window.slSound.connect():window.slSound.success())}}catch(e){}
   const stage=$("qrStage"), wrap=$("qrWrap"), overlay=$("qrConnectOverlay");
   const toast=$("connectToast"), toastMsg=$("connectToastMsg");
   const banner=$("linkedBanner"), bannerText=$("linkedBannerText");
@@ -3747,9 +4029,10 @@ function updatePhones(){
   const list=Object.values(phones);
   const n=list.length;
   if($("phoneCount")){
+    const lim=maxPhonesLimit();
     $("phoneCount").innerHTML=n
-      ?('<span class="phone-count-ok">✓ '+n+" device"+(n>1?"s":"")+" connected</span>")
-      :'<span class="phone-count-wait">Waiting for a phone to scan the QR…</span>';
+      ?('<span class="phone-count-ok">✓ '+n+" / "+lim+" device"+(n>1?"s":"")+" connected</span>")
+      :'<span class="phone-count-wait">Waiting for a phone to scan the QR… (max '+lim+')</span>';
   }
   if($("phoneList")){
     $("phoneList").innerHTML=list.map(p=>
@@ -4015,7 +4298,7 @@ function onMsg(t,d){
       const el=$("comingMsg");
       if(el){el.hidden=false;el.textContent=d.msg||"Help is on the way — stay safe."}
       note(d.msg||"Help is on the way!",false);
-      try{navigator.vibrate&&navigator.vibrate([100,50,100,50,100])}catch(e){}
+      try{slVibrate([100,50,100,50,100])}catch(e){}
     }
   }
   else if(t.endsWith("/checkin")&&role==="server"){
@@ -4036,12 +4319,27 @@ function onMsg(t,d){
     note((d.name||"Someone")+" missed check-in!",true);
   }
   else if(t.endsWith("/stop")&&role==="phone"){note("Server stopped the alarms.");endSos();const el=$("comingMsg");if(el)el.hidden=true}
-  else if(t.endsWith("/phone")&&role==="server"){if(d.id){phones[d.id]={name:d.name||"Phone",last:Date.now()};updatePhones()}}
+  else if(t.endsWith("/phone")&&role==="server"){
+    if(d.id){
+      const limit=maxPhonesLimit();
+      const isNew=!phones[d.id];
+      if(isNew && Object.keys(phones).length>=limit){
+        // At capacity — ignore new device (existing keep heartbeat)
+        if(!window._maxPhoneNoted || Date.now()-window._maxPhoneNoted>8000){
+          window._maxPhoneNoted=Date.now();
+          note("Max "+limit+" phones connected. New device blocked.",true);
+        }
+      }else{
+        phones[d.id]={name:d.name||"Phone",last:Date.now()};
+        updatePhones();
+      }
+    }
+  }
   else if((t.endsWith("/laptop")||t.endsWith("/server"))&&role==="phone"){
     setStatus("Server linked ✓",true);
     if(!window._phoneLinkedOnce){
       window._phoneLinkedOnce=true;
-      try{window.slSound&&(window.slSound.connect?window.slSound.connect():window.slSound.success())}catch(e){}
+      try{if(typeof soundEnabled!=="function"||soundEnabled("connect")){window.slSound&&(window.slSound.connect?window.slSound.connect():window.slSound.success())}}catch(e){}
       try{note("Connected to server ✓",false)}catch(e){}
       const st=$("pstat");
       if(st){st.classList.add("link-flash"); setTimeout(()=>st.classList.remove("link-flash"),1500)}
@@ -4055,9 +4353,21 @@ function baseUrl(){const u=new URL(location.href);u.hash="";u.search="";return u
 function pairLink(){return baseUrl()+"?c="+code}
 function drawQr(){
   const q=$("qr");if(!q)return;q.innerHTML="";
-  const link=pairLink();
-  try{if(typeof QRCode==="undefined"){q.innerHTML="<p class='small'>QR loading… open link below</p>"}else new QRCode(q,{text:link,width:180,height:180,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.M})}catch(e){q.innerHTML="<p class='small'>QR unavailable — use code/link</p>"}
-  const pl=$("pairLinkText");if(pl)pl.textContent=link;
+  // QR encodes ONLY the 6-digit pair code (not a URL)
+  const pairCode=String(code||"").replace(/\D/g,"").slice(0,6);
+  if(!pairCode||pairCode.length!==6){
+    q.innerHTML="<p class='small'>Code not ready</p>";
+    return;
+  }
+  try{
+    if(typeof QRCode==="undefined"){
+      q.innerHTML="<p class='small'>QR loading… use code below</p>";
+    }else{
+      new QRCode(q,{text:pairCode,width:180,height:180,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.M});
+    }
+  }catch(e){q.innerHTML="<p class='small'>QR unavailable — use 6-digit code</p>"}
+  const pl=$("pairLinkText");
+  if(pl) pl.textContent="Code: "+pairCode+"  ·  or open: "+pairLink();
   const ae=$("accountEmailLabel");if(ae)ae.textContent=store.get("sl_account_email")||"";
 }
 function makeCode(){
@@ -4065,7 +4375,7 @@ function makeCode(){
   const accounts=getAccounts();
   if(em&&accounts[em]&&accounts[em].code) return accounts[em].code;
   const saved=store.get("sl_code_server");
-  if(saved&&/^[a-z0-9]{6,12}$/i.test(saved)) return saved;
+  if(saved&&/^\d{6}$/.test(String(saved))) return saved;
   // Should not reach here without login — refuse email-only derivation
   return null;
 }
@@ -4077,7 +4387,7 @@ async function startServer(ok){
   const accounts=getAccounts();
   let pair=store.get("sl_code_server");
   if(accounts[em]&&accounts[em].code) pair=accounts[em].code;
-  if(!pair||!/^[a-z0-9]{6,12}$/i.test(pair)){
+  if(!pair||!/^\d{6}$/.test(String(pair))){
     showAccount();
     authMsg("Please log in again (password now protects your QR code).",true);
     return;
@@ -4086,7 +4396,7 @@ async function startServer(ok){
   hideAuthOverlay();
   role="server";
   store.set("sl_role","server");
-  code=pair;
+  code=String(pair).replace(/\D/g,"").slice(0,6).padStart(6,"0");
   store.set("sl_code_server",code);
   if(accounts[em]){accounts[em].code=code;saveAccounts(accounts)}
   // Dedicated server monitoring page
@@ -4120,7 +4430,8 @@ $("btnHistory").onclick=()=>{$("historyBox").hidden=!$("historyBox").hidden;$("h
 
 function startSiren(){
   if(sirenOn) return;
-  if($("silentMode")&&$("silentMode").checked){
+  const silent=($("silentMode")&&$("silentMode").checked)||settingsGet("silent","0")==="1"||!soundEnabled("alarm");
+  if(silent){
     document.body.classList.add("alarm");
     return;
   }
@@ -4166,7 +4477,7 @@ async function startPhone(){
   if(sc&&sn){code=sc;myName=sn;$("stepCode").hidden=true;$("stepName").hidden=true;$("stepReady").hidden=false;$("nameLabel").textContent="You are: "+myName;await connect();warnings();loadContacts();readBattery();startNetBatWatch();refreshPerms();try{if(typeof Notification!=="undefined"&&Notification.permission==="default"){/* soft */} }catch(e){}}
   else if(sc){code=sc;$("stepCode").hidden=true;$("stepName").hidden=false}
 }
-$("btnCode").onclick=()=>{const c=$("pcode").value.trim().toLowerCase().replace(/[^a-z0-9]/g,"");if(c.length<6||c.length>12){$("pcode").focus();note("Enter the code from the server QR",true);return}code=c;store.set("sl_code_phone",c);$("stepCode").hidden=true;$("stepName").hidden=false;$("pname").focus()};
+$("btnCode").onclick=()=>{const c=$("pcode").value.trim().replace(/\D/g,"").slice(0,6);if(c.length!==6){$("pcode").focus();note("Enter the 6-digit code from the server",true);return}code=c;store.set("sl_code_phone",c);$("stepCode").hidden=true;$("stepName").hidden=false;$("pname").focus()};
 $("btnName").onclick=async()=>{const n=$("pname").value.trim();if(n.length<2){$("pname").focus();return}myName=n.slice(0,24);store.set("sl_name_phone",myName);$("stepName").hidden=true;$("stepReady").hidden=false;$("nameLabel").textContent="You are: "+myName;await connect();warnings();loadContacts();readBattery();startNetBatWatch();refreshPerms();try{if(typeof Notification!=="undefined"&&Notification.permission==="default"){/* soft */} }catch(e){}};
 function warnings(){
   const box=$("warnBox");box.innerHTML="";
@@ -4498,7 +4809,7 @@ async function fireHelp(){
   sosId = Date.now().toString(36);
   acked = false;
   tries = 0;
-  try{ navigator.vibrate && navigator.vibrate([180, 80, 180, 80, 180]); }catch(e){}
+  try{ slVibrate([180, 80, 180, 80, 180]); }catch(e){}
   $("safeBtn").hidden = false;
   $("helpBtn").classList.add("busy");
   $("helpBtn").classList.remove("counting");
@@ -4589,7 +4900,7 @@ $("helpBtn").onclick=()=>{
   $("helpBtn").classList.add("counting");
   if($("cancelCountBtn")) $("cancelCountBtn").hidden=false;
   note("Sending in "+n+"… tap Cancel to stop.",true);
-  try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}
+  try{slVibrate(80)}catch(e){}
   countT=setInterval(()=>{
     n--;
     if(n<=0){
@@ -4598,7 +4909,7 @@ $("helpBtn").onclick=()=>{
     }else{
       if(ov)ov.textContent=String(n);
       note("Sending in "+n+"… tap Cancel to stop.",true);
-      try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}
+      try{slVibrate(60)}catch(e){}
     }
   },1000);
 };
@@ -4763,7 +5074,7 @@ if($("startCheckin")) $("startCheckin").onclick=()=>{
       battery:getBatteryPct(),network:getNetworkLabel(),
       msg:"Check-in timer expired — no response from "+(myName||"phone")
     });
-    try{navigator.vibrate&&navigator.vibrate([200,100,200,100,200])}catch(e){}
+    try{slVibrate([200,100,200,100,200])}catch(e){}
   },ms);
   note("Check-in started ("+mins+" min).",false);
 };
@@ -4909,7 +5220,7 @@ const params=new URLSearchParams(location.search);
 const q=params.get("c")||params.get("code");
 _bootPromise.then(()=>{
   try{
-    if(q&&/^[a-z0-9]{6,12}$/i.test(q)){
+    if(q&&(/^\d{6}$/.test(q)||/^[a-z0-9]{6,12}$/i.test(q))){
       store.set("sl_role","phone");
       store.set("sl_code_phone",q.toLowerCase());
       startPhone();
@@ -4932,6 +5243,57 @@ _bootPromise.then(()=>{
   }catch(e){console&&console.error(e)}
 });
 </script>
+
+
+<!-- Settings panel -->
+<div id="settingsPanel" class="settings-panel" hidden>
+  <div class="settings-sheet" role="dialog" aria-label="Settings">
+    <div class="settings-head">
+      <h3>Settings</h3>
+      <button type="button" class="icon-btn" id="settingsClose" aria-label="Close">✕</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-section">Sound</div>
+      <label class="settings-row"><span>Button click sounds</span>
+        <input type="checkbox" id="setClickSound" checked>
+      </label>
+      <label class="settings-row"><span>Connection sounds</span>
+        <input type="checkbox" id="setConnectSound" checked>
+      </label>
+      <label class="settings-row"><span>Alarm / siren sound</span>
+        <input type="checkbox" id="setAlarmSound" checked>
+      </label>
+      <label class="settings-row"><span>Vibration (phone)</span>
+        <input type="checkbox" id="setVibrate" checked>
+      </label>
+
+      <div class="settings-section" id="setServerOnly">Server</div>
+      <label class="settings-row" id="setMaxRow"><span>Max connected phones</span>
+        <select id="setMaxPhones">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="5" selected>5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+        </select>
+      </label>
+      <label class="settings-row" id="setSilentRow"><span>Silent mode (visual alarm only)</span>
+        <input type="checkbox" id="setSilentMode">
+      </label>
+
+      <div class="settings-section">Account</div>
+      <p class="settings-hint" id="setAccountHint">Not signed in</p>
+      <button type="button" class="btn alt settings-action" id="setSignOut">Sign out</button>
+      <button type="button" class="btn alt settings-action" id="setSwitchRole">Switch role (Phone / Server)</button>
+      <button type="button" class="btn alt settings-action" id="setClearLocal">Clear local data</button>
+
+      <div class="settings-section">About</div>
+      <p class="settings-hint">SafeLink · Women safety · Local pair codes · MQTT relay</p>
+      <p class="settings-hint" style="opacity:.6;font-size:11px">Version showcase build</p>
+    </div>
+  </div>
+</div>
 
 <div id="fake" style="display:none;position:fixed;inset:0;z-index:200;background:#0d0d0d;color:#eee;flex-direction:column;align-items:center;justify-content:center;font-family:ui-monospace,monospace">
   <div id="fakeDisp" class="disp" style="font-size:42px;margin:16px 0;min-height:50px">0</div>
