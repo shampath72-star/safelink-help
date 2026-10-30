@@ -3005,6 +3005,17 @@ h1:hover{
 .settings-action{margin-top:8px!important}
 .settings-hint{color:#c4a0a8;font-size:13px;margin:6px 0 10px}
 
+
+/* Settings only after login / active role */
+#settingsBtn{
+  display:none!important;
+}
+body.page-server #settingsBtn,
+body.page-phone #settingsBtn,
+body.has-session #settingsBtn{
+  display:grid!important;
+}
+
 </style>
 </head>
 <body>
@@ -3549,6 +3560,16 @@ function soundEnabled(kind){
 }
 function vibrateEnabled(){return settingsGet("vibrate","1")!=="0"}
 
+
+function refreshSettingsBtn(){
+  try{
+    const btn=$("settingsBtn"); if(!btn) return;
+    const active=role==="server"||role==="phone"||document.body.classList.contains("page-server")||document.body.classList.contains("page-phone");
+    if(active) document.body.classList.add("has-session");
+    else document.body.classList.remove("has-session");
+  }catch(e){}
+}
+
 function openSettings(){
   const pan=$("settingsPanel"); if(!pan) return;
   // Load values
@@ -3627,16 +3648,6 @@ function bindSettings(){
     hideAccountChip();
     hideAuthOverlay();
     show("pick");
-  };
-  if($("setClearLocal")) $("setClearLocal").onclick=()=>{
-    if(!confirm("Clear all SafeLink data on this device? You will need to set up again.")) return;
-    try{if(client){client.end(true);client=null}}catch(e){}
-    try{
-      const keys=[];
-      for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(k&&k.indexOf("sl_")==0) keys.push(k)}
-      keys.forEach(k=>localStorage.removeItem(k));
-    }catch(e){}
-    location.reload();
   };
 }
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", bindSettings);
@@ -3962,6 +3973,7 @@ function show(id){
   }catch(e){}
   // Scroll to top on page change (mobile)
   try{window.scrollTo(0,0); document.documentElement.scrollTop=0}catch(e){}
+  try{refreshSettingsBtn()}catch(e){}
 }
 function setStatus(t,on){if(role==="server"){$("lstat").textContent=t;$("ldot").classList.toggle("on",!!on)}else{$("pstat").textContent=t;$("pdot").classList.toggle("on",!!on)}}
 function note(t,bad){const el=role==="server"?$("lmsg"):$("pmsg");el.textContent=t;el.className="msg"+(bad?" bad":bad===false?" good":"")}
@@ -4423,6 +4435,7 @@ async function startServer(ok){
   _knownPhoneIds=new Set(Object.keys(phones));
   if(window.__libsReady) window.__libsReady.then(function(){ try{ drawQr(); }catch(e){} });
   try{window.scrollTo(0,0)}catch(e){}
+  try{refreshSettingsBtn()}catch(e){}
 }
 $("arm").onclick=async()=>{try{ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();await ctx.resume()}catch(e){}try{if(navigator.wakeLock)await navigator.wakeLock.request("screen")}catch(e){}try{if(typeof Notification!=="undefined"&&Notification.permission==="default")await Notification.requestPermission()}catch(e){}$("arm").textContent="Armed ✓";note("Alarm armed. Keep this tab open.",false)};
 $("test").onclick=()=>{emergencies["test"]={name:"Test",lat:null,lng:null,ts:Date.now()};renderEmergencies();setTimeout(()=>{delete emergencies["test"];renderEmergencies()},3000)};
@@ -5286,7 +5299,6 @@ _bootPromise.then(()=>{
       <p class="settings-hint" id="setAccountHint">Not signed in</p>
       <button type="button" class="btn alt settings-action" id="setSignOut">Sign out</button>
       <button type="button" class="btn alt settings-action" id="setSwitchRole">Switch role (Phone / Server)</button>
-      <button type="button" class="btn alt settings-action" id="setClearLocal">Clear local data</button>
 
       <div class="settings-section">About</div>
       <p class="settings-hint">SafeLink · Women safety · Local pair codes · MQTT relay</p>
