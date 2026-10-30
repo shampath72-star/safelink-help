@@ -3620,6 +3620,7 @@ function openSettings(){
   }
   // Server-only rows
   const serverish=role==="server"||roleNow==="server";
+  const regen=$("setRegenCode"); if(regen) regen.style.display=serverish?"":"none";
   ["setServerOnly","setMaxRow","setSilentRow"].forEach(id=>{
     const el=$(id); if(el) el.style.display=serverish?"":"none";
   });
@@ -3652,6 +3653,26 @@ function bindSettings(){
     if($("silentMode")) {$("silentMode").checked=on; store.set("sl_silent",on?"1":"0")}
     if(on) try{stopSiren(); document.body.classList.add("alarm")}catch(e){}
   };
+  
+  if($("setRegenCode")) $("setRegenCode").onclick=()=>{
+    if(role!=="server") return;
+    if(!confirm(lang==="hi"?"नया QR कोड बनाएँ? पुराने फोन फिर से जोड़ने होंगे।":"Generate a new random QR code? Phones must re-pair.")) return;
+    const em=store.get("sl_account_email");
+    const accounts=getAccounts();
+    const pairCode=randomPairCode();
+    if(em&&accounts[em]){accounts[em].code=pairCode;saveAccounts(accounts)}
+    code=pairCode;
+    store.set("sl_code_server",pairCode);
+    if($("lcode")) $("lcode").textContent=pairCode;
+    try{drawQr()}catch(e){}
+    // reconnect on new topic
+    try{if(client){client.end(true);client=null}}catch(e){}
+    connect();
+    closeSettings();
+    note(lang==="hi"?"नया कोड: ":"New code: "+pairCode,false);
+    try{window.slSound&&window.slSound.success()}catch(e){}
+  };
+
   if($("setSignOut")) $("setSignOut").onclick=()=>{
     closeSettings();
     try{adminLogout()}catch(e){}
@@ -3983,6 +4004,25 @@ async function hashPass(email, pass){
 function codeFromPassHash(hash){
   return codeFromSecret("sl-pair|"+String(hash||""));
 }
+/** True random 6-char pair code: A–Z, a–z, 0–9 */
+function randomPairCode(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  let out="";
+  try{
+    if(window.crypto&&crypto.getRandomValues){
+      const buf=new Uint32Array(6);
+      crypto.getRandomValues(buf);
+      for(let i=0;i<6;i++) out+=chars[buf[i]%chars.length];
+      return out;
+    }
+  }catch(e){}
+  for(let i=0;i<6;i++) out+=chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
+function normalizePairCode(c){
+  return String(c||"").replace(/[^a-zA-Z0-9]/g,"").slice(0,6);
+}
+
 function authMsg(t,bad){
   const el=$("accountMsg"); if(!el) return;
   el.textContent=t||"";
@@ -3994,11 +4034,12 @@ function setAuthMode(mode){
   const sw=$("btnAuthSwitch"), sw2=$("btnAuthSwitch2");
   const login=$("btnLogin"), create=$("btnCreateAccount");
   const title=$("authTitle"), sub=$("authSub"), hint=$("authFootHint");
+  // Always show confirm-password (login + signup)
+  if(pass2Wrap){pass2Wrap.style.display="block";pass2Wrap.hidden=false}
+  else if(pass2) pass2.style.display="block";
   if(mode==="create"){
     if(title) title.textContent=typeof t==="function"?t("signupTitle"):"Sign up";
     if(sub) sub.textContent=typeof t==="function"?t("signupSub"):"Create an account — email + password protect your private QR";
-    if(pass2Wrap){pass2Wrap.style.display="block";pass2Wrap.hidden=false}
-    else if(pass2) pass2.style.display="block";
     if(login){login.style.display="none";login.hidden=true}
     if(create){create.style.display="block";create.hidden=false}
     if(sw) sw.textContent=typeof t==="function"?t("loginTitle"):"Login";
@@ -4007,8 +4048,6 @@ function setAuthMode(mode){
   }else{
     if(title) title.textContent=typeof t==="function"?t("loginTitle"):"Login";
     if(sub) sub.textContent=typeof t==="function"?t("loginSub"):"Enter your account details to open the alarm station";
-    if(pass2Wrap){pass2Wrap.style.display="none";pass2Wrap.hidden=true}
-    else if(pass2) pass2.style.display="none";
     if(login){login.style.display="block";login.hidden=false}
     if(create){create.style.display="none";create.hidden=true}
     if(sw) sw.textContent=typeof t==="function"?t("signUp"):"Sign up";
@@ -4117,18 +4156,24 @@ function adminLogout(){
 async function doLogin(){
   const rawEm=(($("accountEmail")&&$("accountEmail").value)||"").trim().toLowerCase();
   const pass=($("accountPass")&&$("accountPass").value)||"";
+  const pass2=($("accountPass2")&&$("accountPass2").value)||"";
   const check=isLegitEmail(rawEm);
   if(!check.ok){authMsg(check.msg,true);return}
   const em=check.email;
-  if(!pass||pass.length<4){authMsg("Enter your password (min 4 characters)",true);return}
+  if(!pass||pass.length<4){authMsg(lang==="hi"?"पासवर्ड डालें (कम से कम 4 अक्षर)":"Enter your password (min 4 characters)",true);return}
+  if(!pass2){authMsg(lang==="hi"?"पासवर्ड की पुष्टि करें":"Confirm your password",true);return}
+  if(pass!==pass2){authMsg(lang==="hi"?"पासवर्ड मेल नहीं खाते":"Passwords do not match",true);return}
   const accounts=getAccounts();
-  if(!accounts[em]){authMsg("No account with this email. Create an account first.",true);return}
+  if(!accounts[em]){authMsg(lang==="hi"?"इस ईमेल से कोई खाता नहीं। पहले बनाएँ।":"No account with this email. Create an account first.",true);return}
   const hash=await hashPass(em, pass);
-  if(accounts[em].hash!==hash){authMsg("Wrong password for this email",true);return}
-  // Pair code requires correct password (not email alone)
-  const pairCode=codeFromPassHash(hash);
-  accounts[em].code=pairCode;
-  saveAccounts(accounts);
+  if(accounts[em].hash!==hash){authMsg(lang==="hi"?"गलत पासवर्ड":"Wrong password for this email",true);return}
+  // Use stored random pair code (generate once if missing)
+  let pairCode=normalizePairCode(accounts[em].code);
+  if(pairCode.length!==6){
+    pairCode=randomPairCode();
+    accounts[em].code=pairCode;
+    saveAccounts(accounts);
+  }
   store.set("sl_account_email",em);
   store.set("sl_code_server",pairCode);
   hideAuthOverlay();
@@ -4143,18 +4188,19 @@ async function doCreateAccount(){
   const check=isLegitEmail(rawEm);
   if(!check.ok){authMsg(check.msg,true);return}
   const em=check.email;
-  if(!pass||pass.length<4){authMsg("Password must be at least 4 characters",true);return}
-  if(pass!==pass2){authMsg("Passwords do not match",true);return}
+  if(!pass||pass.length<4){authMsg(lang==="hi"?"पासवर्ड कम से कम 4 अक्षर का हो":"Password must be at least 4 characters",true);return}
+  if(!pass2){authMsg(lang==="hi"?"पासवर्ड की पुष्टि करें":"Confirm your password",true);return}
+  if(pass!==pass2){authMsg(lang==="hi"?"पासवर्ड मेल नहीं खाते":"Passwords do not match",true);return}
   const accounts=getAccounts();
-  if(accounts[em]){authMsg("This email already has an account. Login instead.",true);return}
+  if(accounts[em]){authMsg(lang==="hi"?"यह ईमेल पहले से है। लॉगिन करें।":"This email already has an account. Login instead.",true);return}
   const hash=await hashPass(em, pass);
-  const pairCode=codeFromPassHash(hash);
+  const pairCode=randomPairCode(); // random QR code every new account
   accounts[em]={hash:hash, code:pairCode, created:Date.now()};
   saveAccounts(accounts);
   store.set("sl_account_email",em);
   store.set("sl_code_server",pairCode);
   hideAuthOverlay();
-  authMsg("Account created",false);
+  authMsg(lang==="hi"?"खाता बन गया":"Account created",false);
   try{window.slSound&&window.slSound.success()}catch(e){}
   startServer(true);
 }
@@ -4455,7 +4501,10 @@ if($("clearAllVoice")) $("clearAllVoice").onclick=()=>{
 };
 
 /* MQTT */
-function topic(b){return"safelink/"+code+"/"+b}
+function topic(b){
+  const c=normalizePairCode(code);
+  return "safelink/"+(c||"none")+"/"+b;
+}
 function connect(){
   return new Promise(async resolve=>{
     try{
@@ -4466,12 +4515,12 @@ function connect(){
         resolve(false); return;
       }
       myId="sl_"+role+"_"+Math.random().toString(16).slice(2,9);
-      client=mqtt.connect("wss://broker.hivemq.com:8884/mqtt",{clientId:myId,clean:true,reconnectPeriod:3000,connectTimeout:8000});
+      client=mqtt.connect("wss://broker.hivemq.com:8884/mqtt",{clientId:myId,clean:true,reconnectPeriod:800,connectTimeout:4000,keepalive:20,resubscribe:true});
       client.on("connect",()=>{
         if(role==="server"){client.subscribe(topic("sos"));client.subscribe(topic("cancel"));client.subscribe(topic("phone"));client.subscribe(topic("voice"));client.subscribe(topic("checkin"));setStatus("Waiting for phones…",false)}
         else{client.subscribe(topic("ack"));client.subscribe(topic("stop"));client.subscribe(topic("coming"));client.subscribe(topic("server"));client.subscribe(topic("laptop"));setStatus("Looking for server…",false)}
-        beat();setInterval(beat,3000);
-        if(role==="server") setInterval(updatePhones,2500);
+        beat();setInterval(beat,1200);
+        if(role==="server") setInterval(updatePhones,1500);
         resolve(true);
       });
       client.on("message",(t,buf)=>{let d={};try{d=JSON.parse(buf.toString())}catch(e){} onMsg(t,d)});
@@ -4480,7 +4529,14 @@ function connect(){
     }catch(e){note("Couldn't connect.",true);resolve(false)}
   });
 }
-function pub(b,obj){if(!client||!client.connected)return;try{client.publish(topic(b),JSON.stringify(obj||{}),{qos:1})}catch(e){}}
+function pub(b,obj){
+  if(!client||!client.connected)return;
+  try{
+    // heartbeats fast (qos 0); critical messages reliable (qos 1)
+    const qos=(b==="phone"||b==="server"||b==="laptop")?0:1;
+    client.publish(topic(b),JSON.stringify(obj||{}),{qos:qos});
+  }catch(e){}
+}
 function beat(){if(role==="phone") pub("phone",{id:myId,name:myName||"Phone",ts:Date.now()});else pub("server",{ts:Date.now()})}
 
 function onMsg(t,d){
@@ -4595,7 +4651,7 @@ function pairLink(){return baseUrl()+"?c="+code}
 function drawQr(){
   const q=$("qr");if(!q)return;q.innerHTML="";
   // QR encodes ONLY the 6-char pair code (letters + numbers)
-  const pairCode=String(code||"").replace(/[^a-zA-Z0-9]/g,"").slice(0,6);
+  const pairCode=normalizePairCode(code);
   if(!pairCode||pairCode.length!==6){
     q.innerHTML="<p class='small'>Code not ready</p>";
     return;
@@ -4618,7 +4674,7 @@ function makeCode(){
   const accounts=getAccounts();
   if(em&&accounts[em]&&accounts[em].code) return accounts[em].code;
   const saved=store.get("sl_code_server");
-  if(saved&&/^[a-zA-Z0-9]{6}$/.test(String(saved))) return saved;
+  if(saved&&normalizePairCode(saved).length===6) return normalizePairCode(saved);
   // Should not reach here without login — refuse email-only derivation
   return null;
 }
@@ -4630,7 +4686,7 @@ async function startServer(ok){
   const accounts=getAccounts();
   let pair=store.get("sl_code_server");
   if(accounts[em]&&accounts[em].code) pair=accounts[em].code;
-  if(!pair||!/^[a-zA-Z0-9]{6}$/.test(String(pair))){
+  if(!pair||normalizePairCode(pair).length!==6){
     showAccount();
     authMsg("Please log in again (password now protects your QR code).",true);
     return;
@@ -4639,7 +4695,8 @@ async function startServer(ok){
   hideAuthOverlay();
   role="server";
   store.set("sl_role","server");
-  code=String(pair).replace(/[^a-zA-Z0-9]/g,"").slice(0,6);
+  code=normalizePairCode(pair);
+  if(code.length!==6){showAccount();authMsg("Invalid pair code — log in again.",true);return;}
   store.set("sl_code_server",code);
   if(accounts[em]){accounts[em].code=code;saveAccounts(accounts)}
   // Dedicated server monitoring page
@@ -4721,7 +4778,14 @@ async function startPhone(){
   if(sc&&sn){code=sc;myName=sn;$("stepCode").hidden=true;$("stepName").hidden=true;$("stepReady").hidden=false;$("nameLabel").textContent="You are: "+myName;await connect();warnings();loadContacts();readBattery();startNetBatWatch();refreshPerms();try{if(typeof Notification!=="undefined"&&Notification.permission==="default"){/* soft */} }catch(e){}}
   else if(sc){code=sc;$("stepCode").hidden=true;$("stepName").hidden=false}
 }
-$("btnCode").onclick=()=>{const c=$("pcode").value.trim().replace(/[^a-zA-Z0-9]/g,"").slice(0,6);if(c.length!==6){$("pcode").focus();note(lang==="hi"?"सर्वर वाला 6 अक्षर का कोड डालें":"Enter the 6-character code from the server",true);return}code=c;store.set("sl_code_phone",c);$("stepCode").hidden=true;$("stepName").hidden=false;$("pname").focus()};
+$("btnCode").onclick=()=>{
+  const c=normalizePairCode($("pcode").value);
+  if(c.length!==6){$("pcode").focus();note(lang==="hi"?"सर्वर वाला 6 अक्षर का कोड डालें (अक्षर + अंक)":"Enter the 6-character code (letters + numbers)",true);return}
+  code=c;
+  store.set("sl_code_phone",c);
+  $("stepCode").hidden=true;$("stepName").hidden=false;$("pname").focus();
+  try{note(lang==="hi"?"कोड सेव हो गया":"Code saved — enter your name",false)}catch(e){}
+};
 $("btnName").onclick=async()=>{const n=$("pname").value.trim();if(n.length<2){$("pname").focus();return}myName=n.slice(0,24);store.set("sl_name_phone",myName);$("stepName").hidden=true;$("stepReady").hidden=false;$("nameLabel").textContent="You are: "+myName;await connect();warnings();loadContacts();readBattery();startNetBatWatch();refreshPerms();try{if(typeof Notification!=="undefined"&&Notification.permission==="default"){/* soft */} }catch(e){}};
 function warnings(){
   const box=$("warnBox");box.innerHTML="";
@@ -5525,6 +5589,7 @@ _bootPromise.then(()=>{
       <label class="settings-row" id="setSilentRow"><span>Silent mode (visual alarm only)</span>
         <input type="checkbox" id="setSilentMode">
       </label>
+      <button type="button" class="btn alt settings-action" id="setRegenCode" style="display:none">Generate new QR code</button>
 
       <div class="settings-section">Account</div>
       <p class="settings-hint" id="setAccountHint">Not signed in</p>
