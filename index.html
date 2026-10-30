@@ -2685,116 +2685,196 @@ h1:hover{
 }
 
 
-/* ========== Device connected + QR celebrate ========== */
+/* ========== Device connected + QR celebrate (enhanced) ========== */
 .qr-stage{
   position:relative;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  margin:8px auto 12px;
-  min-height:200px;
+  margin:10px auto 14px;
+  min-height:220px;
+  perspective:600px;
 }
 .qr-wrap{
   position:relative;
   z-index:2;
   background:#fff!important;
-  border-radius:16px!important;
+  border-radius:18px!important;
   padding:14px!important;
   display:inline-block;
   box-shadow:0 12px 28px rgba(0,0,0,.4), 0 0 0 1px rgba(244,63,94,.25)!important;
-  transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
+  transition:transform .4s cubic-bezier(.22,1,.36,1), box-shadow .4s ease;
+  transform-style:preserve-3d;
 }
+/* Idle soft float when waiting */
+.qr-stage:not(.qr-celebrate) .qr-wrap{
+  animation:qrIdleFloat 3.5s ease-in-out infinite;
+}
+@keyframes qrIdleFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-4px)}
+}
+
+/* CONNECT moment */
 .qr-wrap.qr-pulse-connect{
-  animation:qrConnectPulse .9s cubic-bezier(.22,1,.36,1) both;
-  box-shadow:0 0 0 4px rgba(74,222,128,.45), 0 0 32px rgba(74,222,128,.35), 0 12px 28px rgba(0,0,0,.4)!important;
+  animation:qrConnectBoom 1.1s cubic-bezier(.22,1,.36,1) both!important;
 }
-@keyframes qrConnectPulse{
-  0%{transform:scale(.92); filter:brightness(1)}
-  40%{transform:scale(1.08); filter:brightness(1.15)}
-  100%{transform:scale(1); filter:brightness(1)}
+@keyframes qrConnectBoom{
+  0%{transform:scale(.85) rotateY(-12deg); filter:brightness(1) saturate(1); box-shadow:0 0 0 0 rgba(74,222,128,0)}
+  25%{transform:scale(1.12) rotateY(6deg); filter:brightness(1.25) saturate(1.3)}
+  45%{transform:scale(0.97) rotateY(-2deg)}
+  65%{transform:scale(1.05) rotateY(1deg); box-shadow:0 0 0 8px rgba(74,222,128,.35), 0 0 40px rgba(74,222,128,.45), 0 16px 36px rgba(0,0,0,.4)}
+  100%{transform:scale(1) rotateY(0); filter:brightness(1); box-shadow:0 0 0 3px rgba(74,222,128,.4), 0 0 28px rgba(74,222,128,.3), 0 12px 28px rgba(0,0,0,.4)}
 }
 .qr-stage.qr-celebrate .qr-wrap{
-  border-color:rgba(74,222,128,.6);
+  box-shadow:0 0 0 3px rgba(74,222,128,.45), 0 0 36px rgba(74,222,128,.35), 0 14px 32px rgba(0,0,0,.4)!important;
 }
+
+/* Scan line sweep on connect */
+.qr-wrap.qr-pulse-connect::before{
+  content:"";
+  position:absolute; left:8px; right:8px; top:8px;
+  height:3px; border-radius:2px;
+  background:linear-gradient(90deg, transparent, #4ade80, #fff, #4ade80, transparent);
+  box-shadow:0 0 12px #4ade80, 0 0 24px rgba(74,222,128,.6);
+  animation:scanSweep 0.85s ease-in-out both;
+  z-index:4; pointer-events:none;
+}
+@keyframes scanSweep{
+  0%{top:10%; opacity:0}
+  15%{opacity:1}
+  100%{top:88%; opacity:0}
+}
+
 .qr-connect-overlay{
   position:absolute; inset:0;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  background:rgba(6,20,12,.82);
-  border-radius:12px;
+  background:radial-gradient(circle at 50% 45%, rgba(22,163,74,.55), rgba(6,20,12,.9));
+  border-radius:14px;
   opacity:0;
   pointer-events:none;
-  transition:opacity .25s ease;
+  transition:opacity .3s ease;
   z-index:5;
+  overflow:hidden;
 }
 .qr-connect-overlay.show{opacity:1}
+.qr-connect-overlay.show::before{
+  content:"";
+  position:absolute; inset:-20%;
+  background:conic-gradient(from 0deg, transparent, rgba(74,222,128,.25), transparent 40%);
+  animation:spinGlow 1.2s linear both;
+}
+@keyframes spinGlow{to{transform:rotate(360deg)}}
+
 .qr-check{
-  width:64px;height:64px;border-radius:50%;
-  background:linear-gradient(145deg,#4ade80,#16a34a);
-  color:#fff; font:900 32px/64px system-ui; text-align:center;
-  box-shadow:0 0 0 6px rgba(74,222,128,.3), 0 8px 24px rgba(22,163,74,.45);
-  animation:checkPop .55s cubic-bezier(.22,1,.36,1) both;
+  position:relative; z-index:1;
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(145deg,#86efac,#16a34a 55%,#15803d);
+  color:#fff; font:900 36px/72px system-ui; text-align:center;
+  box-shadow:0 0 0 0 rgba(74,222,128,.5), 0 10px 28px rgba(22,163,74,.5);
+  animation:checkPop 0.7s cubic-bezier(.34,1.56,.64,1) both;
+}
+.qr-connect-overlay.show .qr-check{
+  animation:checkPop 0.7s cubic-bezier(.34,1.56,.64,1) both, checkRing 1.2s ease-out .1s both;
 }
 @keyframes checkPop{
-  0%{transform:scale(0) rotate(-30deg); opacity:0}
-  60%{transform:scale(1.15) rotate(4deg); opacity:1}
+  0%{transform:scale(0) rotate(-40deg); opacity:0}
+  60%{transform:scale(1.2) rotate(6deg); opacity:1}
   100%{transform:scale(1) rotate(0)}
 }
-.qr-connect-text{
-  margin-top:10px; color:#bbf7d0; font:800 14px system-ui; letter-spacing:.06em;
-  text-transform:uppercase; animation:fadeUp .4s ease .15s both;
+@keyframes checkRing{
+  0%{box-shadow:0 0 0 0 rgba(74,222,128,.55), 0 10px 28px rgba(22,163,74,.5)}
+  100%{box-shadow:0 0 0 22px rgba(74,222,128,0), 0 10px 28px rgba(22,163,74,.45)}
 }
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.qr-connect-text{
+  position:relative; z-index:1;
+  margin-top:12px; color:#dcfce7; font:800 15px system-ui; letter-spacing:.1em;
+  text-transform:uppercase; text-shadow:0 0 12px rgba(74,222,128,.6);
+  animation:fadeUp .45s ease .2s both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 .qr-rings{
-  position:absolute; left:50%; top:50%; width:180px; height:180px;
+  position:absolute; left:50%; top:50%; width:200px; height:200px;
   transform:translate(-50%,-50%); pointer-events:none; z-index:1;
 }
 .qr-rings span{
   position:absolute; inset:0; border-radius:50%;
-  border:2px solid rgba(74,222,128,.55);
-  animation:ringOut 1.4s ease-out forwards;
+  border:2px solid rgba(74,222,128,.6);
+  box-shadow:0 0 16px rgba(74,222,128,.35);
+  animation:ringOut 1.6s ease-out forwards;
   opacity:0;
 }
-.qr-rings span:nth-child(2){animation-delay:.2s}
-.qr-rings span:nth-child(3){animation-delay:.4s}
+.qr-rings span:nth-child(2){animation-delay:.18s; border-color:rgba(134,239,172,.5)}
+.qr-rings span:nth-child(3){animation-delay:.36s; border-color:rgba(74,222,128,.35)}
 @keyframes ringOut{
-  0%{transform:scale(.6); opacity:.7}
-  100%{transform:scale(1.8); opacity:0}
+  0%{transform:scale(.45); opacity:.85}
+  100%{transform:scale(2.1); opacity:0}
+}
+
+/* Particle-like sparks via box-shadow on stage */
+.qr-stage.qr-celebrate::after{
+  content:"";
+  position:absolute; left:50%; top:50%; width:12px; height:12px; margin:-6px;
+  border-radius:50%;
+  background:#4ade80;
+  box-shadow:
+    -40px -30px 0 2px #86efac,
+    45px -25px 0 1px #4ade80,
+    -35px 35px 0 2px #bbf7d0,
+    40px 30px 0 1px #22c55e,
+    0 -50px 0 2px #86efac,
+    0 48px 0 1px #4ade80,
+    -55px 5px 0 1px #bbf7d0,
+    55px 8px 0 2px #22c55e;
+  animation:sparks 1s ease-out both;
+  pointer-events:none; z-index:3;
+}
+@keyframes sparks{
+  0%{transform:scale(.2); opacity:1}
+  100%{transform:scale(1.4); opacity:0}
 }
 
 .connect-toast{
   position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom,0px));
-  transform:translateX(-50%) translateY(120%);
+  transform:translateX(-50%) translateY(140%);
   z-index:120;
-  display:flex; align-items:center; gap:10px;
-  padding:14px 18px; border-radius:16px;
-  background:linear-gradient(135deg,#14532d,#166534);
-  border:1px solid rgba(74,222,128,.5);
-  color:#fff; font:700 14px system-ui;
-  box-shadow:0 12px 32px rgba(0,0,0,.45), 0 0 24px rgba(74,222,128,.25);
-  transition:transform .45s cubic-bezier(.22,1,.36,1), opacity .3s ease;
+  display:flex; align-items:center; gap:12px;
+  padding:16px 20px; border-radius:18px;
+  background:linear-gradient(135deg,#14532d 0%,#166534 50%,#15803d 100%);
+  border:1.5px solid rgba(134,239,172,.55);
+  color:#fff; font:800 15px system-ui;
+  box-shadow:0 14px 36px rgba(0,0,0,.5), 0 0 32px rgba(74,222,128,.3);
+  transition:transform .5s cubic-bezier(.34,1.4,.64,1), opacity .3s ease;
   opacity:0; pointer-events:none;
-  max-width:min(92vw,360px);
+  max-width:min(92vw,380px);
 }
 .connect-toast.show{
   transform:translateX(-50%) translateY(0);
   opacity:1;
 }
-.connect-toast-icon{font-size:22px}
+.connect-toast-icon{
+  font-size:26px;
+  animation:toastIcon 0.6s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes toastIcon{
+  0%{transform:scale(0) rotate(-20deg)}
+  100%{transform:scale(1) rotate(0)}
+}
 
 .linked-banner{
   display:flex; align-items:center; gap:10px;
   margin:10px 0 8px; padding:12px 14px;
   border-radius:14px;
-  background:rgba(22,163,74,.15);
-  border:1.5px solid rgba(74,222,128,.45);
+  background:linear-gradient(90deg, rgba(22,163,74,.2), rgba(22,163,74,.08));
+  border:1.5px solid rgba(74,222,128,.5);
   color:#bbf7d0; font:700 13px system-ui;
-  animation:bannerIn .45s cubic-bezier(.22,1,.36,1) both;
+  animation:bannerIn .5s cubic-bezier(.22,1,.36,1) both;
 }
 .linked-banner[hidden]{display:none!important}
 @keyframes bannerIn{
-  from{opacity:0; transform:translateY(-8px) scale(.98)}
+  from{opacity:0; transform:translateY(-10px) scale(.96)}
   to{opacity:1; transform:translateY(0) scale(1)}
 }
 .linked-pulse{
@@ -2816,8 +2896,10 @@ h1:hover{
 @keyframes flashGreen{0%,100%{filter:brightness(1)} 50%{filter:brightness(1.4)}}
 
 @media(prefers-reduced-motion:reduce){
-  .qr-wrap.qr-pulse-connect, .qr-check, .qr-rings span, .connect-toast, .linked-banner, .phone-li-in{animation:none!important}
+  .qr-wrap.qr-pulse-connect, .qr-check, .qr-rings span, .connect-toast, .linked-banner, .phone-li-in,
+  .qr-stage:not(.qr-celebrate) .qr-wrap, .qr-stage.qr-celebrate::after{animation:none!important}
 }
+
 
 </style>
 </head>
@@ -3208,13 +3290,45 @@ const $ = id => document.getElementById(id);
       setTimeout(()=>beep(659.25, 0.1, "sine", 0.11), 70);
       setTimeout(()=>beep(783.99, 0.16, "sine", 0.12), 150);
     },
-    // Connect specifically — brighter
+    // Connect — clean, professional “linked” chime (product UI style)
     connect(){
-      noiseBurst(0.05, 0.06);
-      beep(440, 0.08, "sine", 0.1);
-      setTimeout(()=>beep(660, 0.1, "sine", 0.11), 60);
-      setTimeout(()=>beep(880, 0.14, "triangle", 0.1), 130);
-      setTimeout(()=>beep(1320, 0.08, "sine", 0.06), 220);
+      const ctx=ensureCtx(); if(!ctx) return;
+      try{
+        const t0=ctx.currentTime;
+        // Soft filtered noise for a subtle “lock-in” texture
+        const n=Math.floor(ctx.sampleRate*0.05);
+        const buf=ctx.createBuffer(1,n,ctx.sampleRate);
+        const d=buf.getChannelData(0);
+        for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.2);
+        const src=ctx.createBufferSource();
+        const ng=ctx.createGain();
+        const nf=ctx.createBiquadFilter();
+        nf.type="lowpass"; nf.frequency.value=1200;
+        src.buffer=buf; ng.gain.value=0.04;
+        src.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
+        src.start(t0);
+        // Two clean sine tones: C5 → E5 (major, calm confidence)
+        function tone(freq, start, dur, vol){
+          const o=ctx.createOscillator();
+          const g=ctx.createGain();
+          const f=ctx.createBiquadFilter();
+          f.type="lowpass"; f.frequency.value=2800;
+          o.type="sine";
+          o.frequency.setValueAtTime(freq, t0+start);
+          g.gain.setValueAtTime(0.0001, t0+start);
+          g.gain.exponentialRampToValueAtTime(vol, t0+start+0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0+start+dur);
+          o.connect(f); f.connect(g); g.connect(ctx.destination);
+          o.start(t0+start); o.stop(t0+start+dur+0.02);
+        }
+        tone(523.25, 0.00, 0.18, 0.11);  // C5
+        tone(659.25, 0.09, 0.28, 0.10);  // E5
+        // Very soft high harmonic for polish
+        tone(1046.5, 0.12, 0.16, 0.035);
+      }catch(e){
+        beep(523.25, 0.15, "sine", 0.1);
+        setTimeout(()=>beep(659.25, 0.22, "sine", 0.09), 90);
+      }
     },
     warn(){
       beep(300, 0.12, "square", 0.06, 200);
@@ -3582,18 +3696,24 @@ function celebratePhoneConnect(name){
   const label=(name||"Device")+" connected";
   if(toastMsg) toastMsg.textContent=label+" ✓";
   if(bannerText) bannerText.textContent=label+" ✓";
-  if(stage){stage.classList.remove("qr-celebrate"); void stage.offsetWidth; stage.classList.add("qr-celebrate")}
-  if(wrap){wrap.classList.remove("qr-pulse-connect"); void wrap.offsetWidth; wrap.classList.add("qr-pulse-connect")}
+  if(stage){stage.classList.remove("qr-celebrate"); void stage.offsetWidth; stage.classList.add("qr-celebrate");
+    clearTimeout(window._qrStageT);
+    window._qrStageT=setTimeout(()=>{try{stage.classList.remove("qr-celebrate")}catch(e){}}, 1600);
+  }
+  if(wrap){wrap.classList.remove("qr-pulse-connect"); void wrap.offsetWidth; wrap.classList.add("qr-pulse-connect");
+    clearTimeout(window._qrWrapT);
+    window._qrWrapT=setTimeout(()=>{try{wrap.classList.remove("qr-pulse-connect")}catch(e){}}, 1200);
+  }
   if(overlay){
     overlay.hidden=false;
     overlay.classList.remove("show"); void overlay.offsetWidth; overlay.classList.add("show");
     clearTimeout(window._qrOverlayT);
-    window._qrOverlayT=setTimeout(()=>{try{overlay.classList.remove("show"); overlay.hidden=true}catch(e){}}, 2200);
+    window._qrOverlayT=setTimeout(()=>{try{overlay.classList.remove("show"); overlay.hidden=true}catch(e){}}, 2600);
   }
   if(rings){
     rings.innerHTML='<span></span><span></span><span></span>';
     clearTimeout(window._qrRingsT);
-    window._qrRingsT=setTimeout(()=>{try{rings.innerHTML=""}catch(e){}}, 1800);
+    window._qrRingsT=setTimeout(()=>{try{rings.innerHTML=""}catch(e){}}, 2000);
   }
   if(toast){
     toast.hidden=false;
